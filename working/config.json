@@ -1,0 +1,86 @@
+{
+    "Version": "0.1.0",
+    "Users":
+    [
+        {
+            "Id": 0,
+            "Mail": "None",
+            "Name": "None",
+            "Token": "None",
+            "Permissions":
+            {
+                "CreateUser": true,
+                "EditUser": true,
+                "DeleteUser": true,
+                "CreateModule": true,
+                "EditModule": true,
+                "DeleteModule": true,
+                "CreateArticle": true,
+                "EditArticle": true,
+                "DeleteArticle": true,
+                "CreateComment": true,
+                "EditComment": true,
+                "DeleteComment": true
+            }
+        }
+    ],
+    "Modules":
+    [
+        {
+            "Id": 0,
+            "Name": "Home",
+            "Previous": -1
+        },
+        {
+            "Id": 1,
+            "Name": "About",
+            "Previous": 0
+        }
+    ],
+    "Articles":
+    [
+        {
+            "Id": 0,
+            "Path": "articles/welcome",
+            "Title": "Welcome",
+            "AuthorId": 0,
+            "DateTime": "None",
+            "ModuleId": 0
+        }
+    ],
+    "Comments":
+    [
+        {
+            "Id": 0,
+            "Content": "Main comment",
+            "BelongsTo": 0,
+            "RepliesTo": -1,
+            "AuthorId": 0,
+            "DateTime": "2000/00/00-00:00:00"
+        },
+        {
+            "Id": 1,
+            "Content": "Sub comment 1",
+            "BelongsTo": 0,
+            "RepliesTo": 0,
+            "AuthorId": 0,
+            "DateTime": "2000/00/00-00:00:00"
+        },
+        {
+            "Id": 2,
+            "Content": "Sub comment 2",
+            "BelongsTo": 0,
+            "RepliesTo": 1,
+            "AuthorId": 0,
+            "DateTime": "2000/00/00-00:00:00"
+        },
+        {
+            "Id": 3,
+            "Content": "Another comment",
+            "BelongsTo": 0,
+            "RepliesTo": -1,
+            "AuthorId": 0,
+            "DateTime": "2000/00/00-00:00:00"
+        }
+   ]
+}
