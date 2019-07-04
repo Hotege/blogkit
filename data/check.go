@@ -21,3 +21,21 @@ func CheckArticleExistById(id int) bool {
     }
     return false
 }
+
+func CheckUserExistByMail(mail string) bool {
+    for _, v := range config.Cfg.Users {
+        if v.Mail == mail {
+            return true
+        }
+    }
+    return false
+}
+
+func CheckUserExistByName(name string) bool {
+    for _, v := range config.Cfg.Users {
+        if v.Name == name {
+            return true
+        }
+    }
+    return false
+}

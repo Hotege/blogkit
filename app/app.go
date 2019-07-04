@@ -42,7 +42,7 @@ func Run() {
                 if r.Method == "POST" {
                     r.ParseForm()
                     if r.PostForm["init_password"][0] != r.PostForm["init_confirm"][0] {
-                        io.WriteString(w, render.RenderConfirmFailed())
+                        io.WriteString(w, render.RenderError("Password not confirmed."))
                         return
                     }
                     config.UpdateAdmin(r.PostForm["init_mail"][0], r.PostForm["init_name"][0], r.PostForm["init_password"][0])
@@ -90,7 +90,11 @@ func Run() {
                 if r.Method == "POST" {
                     r.ParseForm()
                     if r.PostForm["signup_password"][0] != r.PostForm["signup_confirm"][0] {
-                        io.WriteString(w, render.RenderConfirmFailed())
+                        io.WriteString(w, render.RenderError("Password not confirmed."))
+                        return
+                    }
+                    if data.CheckUserExistByMail(r.PostForm["signup_mail"][0]) || data.CheckUserExistByName(r.PostForm["signup_name"][0]) {
+                        io.WriteString(w, render.RenderError("Mail or name already exist."))
                         return
                     }
                     config.AddNewUser(r.PostForm["signup_mail"][0], r.PostForm["signup_name"][0], r.PostForm["signup_password"][0])
@@ -134,7 +138,7 @@ func Run() {
                         io.WriteString(w, render.RenderPage(id, isLogin == "true", loginId))
                         return
                     } else {
-                        io.WriteString(w, render.RenderNotFound())
+                        io.WriteString(w, render.RenderError("Page not found."))
                         return
                     }
                 } else {
@@ -158,7 +162,7 @@ func Run() {
                         io.WriteString(w, render.RenderArticle(id, isLogin == "true", loginId))
                         return
                     } else {
-                        io.WriteString(w, render.RenderNotFound())
+                        io.WriteString(w, render.RenderError("Page not found."))
                         return
                     }
                 } else {
