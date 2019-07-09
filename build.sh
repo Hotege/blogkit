@@ -1,3 +1,5 @@
+#!/bin/bash
+
 rm working/blogkit
 
 docker run --rm -v `pwd`:/go/src/blogkit -w /go/src/blogkit golang:1.12.6 \
