@@ -32,5 +32,6 @@ func AddNewUser(mail string, name string, password string) {
     u.Mail = mail
     u.Name = name
     u.Token = getPasswordHash(password)
+    u.Permissions.CreateComment = true
     Cfg.Users = append(Cfg.Users, u)
 }
