@@ -1,3 +1,10 @@
-[l][Welcome to BlogKit!]
-[t][You can delete this article via admin area.
-Visit URL for more information.]
+[
+    {
+        "Type": "l",
+        "Value": "Welcome to BlogKit!"
+    },
+    {
+        "Type": "t",
+        "Value": "You can delete this article via admin area.\nVisit URL for more information."
+    }
+]

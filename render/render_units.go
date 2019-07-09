@@ -57,7 +57,7 @@ func renderModule(id int) string {
 func renderArticle(id int) string {
     result := ""
     result +=
-`<i>` + data.DecodeArticle(config.Cfg.Articles[id].Path) + `</i><br>
+`` + data.DecodeArticle(config.Cfg.Articles[id].Path) + `<br>
 `
     for _, v := range config.Cfg.Comments {
         if v.BelongsTo == id && v.RepliesTo == -1 {
