@@ -7,4 +7,4 @@ go build -o working/blogkit -a -ldflags '-s -w -linkmode "external" -extldflags 
 
 upx working/blogkit -9 -q > /dev/null
 
-docker build -t blogkit:0.3.0 .
+docker build -t blogkit:0.3.1 .
