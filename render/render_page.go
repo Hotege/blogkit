@@ -1,5 +1,9 @@
 package render
 
+import (
+    "blogkit/config"
+)
+
 func RenderPage(moduleId int, isLogin bool, loginId int) string {
     result :=
 `<html>
@@ -9,7 +13,14 @@ func RenderPage(moduleId int, isLogin bool, loginId int) string {
 <body>
 `
     result += renderLogin(isLogin, loginId)
-    result += renderModule(moduleId)
+    if isLogin {
+        if config.Cfg.Users[loginId].Permissions.CreateArticle {
+            result +=
+`    <a href='create_article'><b>New article</b></a><br>
+`
+        }
+    }
+    result += renderModule(moduleId, isLogin, loginId)
     result +=
 `</body>
 </html>`

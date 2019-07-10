@@ -125,7 +125,7 @@ func Run() {
                 return
             } else {
                 r.ParseForm()
-                login_data := strings.Split(strings.Split(loginCookie.String(), "=")[1], ",")
+                login_data := strings.Split(strings.Trim(strings.Split(loginCookie.String(), "=")[1], "\""), ",")
                 isLogin := strings.Split(login_data[0], ":")[1]
                 loginId, _ := strconv.Atoi(strings.Split(login_data[1], ":")[1])
                 if _, ok := r.Form["id"]; ok {
@@ -153,17 +153,50 @@ func Run() {
                 return
             } else {
                 r.ParseForm()
-                login_data := strings.Split(strings.Split(loginCookie.String(), "=")[1], ",")
+                login_data := strings.Split(strings.Trim(strings.Split(loginCookie.String(), "=")[1], "\""), ",")
                 isLogin := strings.Split(login_data[0], ":")[1]
                 loginId, _ := strconv.Atoi(strings.Split(login_data[1], ":")[1])
                 if _, ok := r.Form["id"]; ok {
                     id, _ := strconv.Atoi(r.Form["id"][0])
-                    if data.CheckArticleExistById(id) {
-                        io.WriteString(w, render.RenderArticle(id, isLogin == "true", loginId))
-                        return
-                    } else {
-                        io.WriteString(w, render.RenderError("Page not found."))
-                        return
+                    if r.Method == "GET" {
+                        if data.CheckArticleExistById(id) {
+                            io.WriteString(w, render.RenderArticle(id, isLogin == "true", loginId))
+                            return
+                        } else {
+                            io.WriteString(w, render.RenderError("Page not found."))
+                            return
+                        }
+                    }
+                    if r.Method == "POST" {
+                        if isLogin != "true" {
+                            io.WriteString(w, render.RenderError("Need login."))
+                            return
+                        }
+                        if !data.CheckUserExistById(loginId) {
+                            newCookie := http.Cookie {
+                                Name: "user_login",
+                                Value: "login:false,id:0",
+                            }   
+                            http.SetCookie(w, &newCookie)
+                            loginCookie = &newCookie
+                            io.WriteString(w, render.RenderError("User error."))
+                            return
+                        }
+                        if data.CheckArticleExistById(id) {
+                            if r.Form["do"][0] == "main_comment" {
+                                config.CreateComment(r.PostForm["main_comment_content"][0], id, -1, loginId)
+                            }
+                            if r.Form["do"][0] == "reply_comment" {
+                                replyId, _ := strconv.Atoi(r.PostForm["reply_id"][0])
+                                config.CreateComment(r.PostForm["reply_comment_content"][0], id, replyId, loginId)
+                            }
+                            config.UpdateFile()
+                            http.Redirect(w, r, "/article?id=" + r.Form["id"][0], http.StatusFound)
+                            return
+                        } else {
+                            io.WriteString(w, render.RenderError("Page not found."))
+                            return
+                        }
                     }
                 } else {
                     http.Redirect(w, r, "/", http.StatusFound)

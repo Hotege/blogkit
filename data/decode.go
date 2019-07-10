@@ -23,7 +23,7 @@ func DecodeArticle(path string) string {
         switch v.Type {
             case "l":
                 result +=
-`<h2>` + v.Value + `</h2>
+`    <h2>` + v.Value + `</h2>
 `
             case "t":
                 fallthrough
@@ -31,7 +31,7 @@ func DecodeArticle(path string) string {
                 lines := strings.Split(v.Value, "\n")
                 for _, l := range lines {
                     result +=
-`<p>` + l + `</p>
+`    <p>` + l + `</p>
 `
                 }
         }

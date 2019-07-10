@@ -39,3 +39,12 @@ func CheckUserExistByName(name string) bool {
     }
     return false
 }
+
+func CheckUserExistById(id int) bool {
+    for _, v := range config.Cfg.Users {
+        if v.Id == id {
+            return true
+        }
+    }
+    return false
+}
