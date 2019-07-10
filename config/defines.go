@@ -35,7 +35,7 @@ type Permission struct {
 
 type Module struct {
     Id int `json:ID`
-    Name string `json:Mail`
+    Name string `json:Name`
     Previous int `json:Previous`
 }
 
