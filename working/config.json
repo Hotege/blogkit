@@ -1,5 +1,5 @@
 {
-    "Version": "0.3.1",
+    "Version": "0.4.0",
     "Users":
     [
         {
@@ -44,7 +44,7 @@
             "Path": "articles/welcome",
             "Title": "Welcome",
             "AuthorId": 0,
-            "DateTime": "None",
+            "DateTime": "2000/00/00-00:00:00",
             "ModuleId": 0
         }
     ],
