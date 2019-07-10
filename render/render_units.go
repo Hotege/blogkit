@@ -95,14 +95,23 @@ func renderArticle(id int, isLogin bool, loginId int) string {
             hideReplyComment(id, hId);
             document.getElementById("reply_form").submit();
         }
+        function deleteComment(id) {
+            var msg = confirm("Will you delete this comment?");
+            if (msg) {
+                document.getElementById("delete_id").value = id;
+                document.getElementById("delete_form").submit();
+            }
+        }
     </script>
 `
-    result +=
+    if isLogin {
+        if config.Cfg.Users[loginId].Permissions.CreateComment {
+            result +=
 `    <div id='hidebg' style='position: absolute; left: 0px; top: 0px; background-color: #000000; width: 100%; filter: alpha(opacity=60); opacity: 0.6; z-index: 2;'></div>
 `
-    result +=
+            result +=
 `    <div id='reply_comment' style='position: absolute; left: 30%; top: 200px; background-color: #fff; border: 1px solid black; display: none; z-index: 3;'>
-        <form id='reply_form' action='article?id=` +strconv.Itoa(id) + `&do=reply_comment' method='POST'>
+        <form id='reply_form' action='article?id=` + strconv.Itoa(id) + `&do=reply_comment' method='POST'>
             <span><input id='reply_id' name='reply_id' readonly='readonly' style='display: none;' />
             <div style='display: inline-block; cursor: pointer;' onclick='hideReplyComment("reply_comment", "hidebg");'>X</div></span><br>
             <span>content:</span><br>
@@ -111,6 +120,17 @@ func renderArticle(id int, isLogin bool, loginId int) string {
         </form>
     </div>
 `
+        }
+        if config.Cfg.Users[loginId].Permissions.DeleteComment {
+            result +=
+`    <div style='display: none;'>
+        <form id='delete_form' action='article?id=` + strconv.Itoa(id) + `&do=delete_comment' method='POST'>
+            <input id='delete_id' name='delete_id' readonly='readonly' />
+        </form>
+    </div>
+`
+        }
+    }
     result += `    <span>`
     if isLogin {
         if config.Cfg.Users[loginId].Permissions.EditArticle {
@@ -148,7 +168,7 @@ func renderArticle(id int, isLogin bool, loginId int) string {
                     result += `<span> <a id='` + replyId + `' href='javascript:showReplyComment("reply_comment", "hidebg", "` + strconv.Itoa(v.Id) + `");'>Reply</a></span>`
                 }
                 if config.Cfg.Users[loginId].Permissions.DeleteComment {
-                    result += `<span> <a href='#'>Delete</a></span>`
+                    result += `<span> <a href='javascript:deleteComment(` + strconv.Itoa(v.Id) + `);'>Delete</a></span>`
                 }
             }
             result += `<br>
@@ -170,7 +190,7 @@ func renderArticle(id int, isLogin bool, loginId int) string {
                                 result += `<span> <a id='` + replyId + `' href='javascript:showReplyComment("reply_comment", "hidebg", "` + strconv.Itoa(sub.Id) + `");'>Reply</a></span>`
                             }
                             if config.Cfg.Users[loginId].Permissions.DeleteComment {
-                                result += `<span> <a href='#'>Delete</a></span>`
+                                result += `<span> <a href='javascript:deleteComment(` + strconv.Itoa(sub.Id) + `)'>Delete</a></span>`
                             }
                         }
                         result += `<br>

@@ -47,3 +47,16 @@ func CreateComment(content string, belongsTo int, repliesTo int, authorId int) {
     c.DateTime = time.Now().Format("2006/01/02-15:04:05")
     Cfg.Comments = append(Cfg.Comments, c)
 }
+
+func DeleteComment(id int) {
+    dId := -1
+    for k, v := range Cfg.Comments {
+        if v.Id == id {
+            dId = k
+            break
+        }
+    }
+    if dId != -1 {
+        Cfg.Comments = append(Cfg.Comments[:dId], Cfg.Comments[dId + 1:]...)
+    }
+}

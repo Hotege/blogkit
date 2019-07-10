@@ -190,6 +190,10 @@ func Run() {
                                 replyId, _ := strconv.Atoi(r.PostForm["reply_id"][0])
                                 config.CreateComment(r.PostForm["reply_comment_content"][0], id, replyId, loginId)
                             }
+                            if r.Form["do"][0] == "delete_comment" {
+                                deleteId, _ := strconv.Atoi(r.PostForm["delete_id"][0])
+                                config.DeleteComment(deleteId)
+                            }
                             config.UpdateFile()
                             http.Redirect(w, r, "/article?id=" + r.Form["id"][0], http.StatusFound)
                             return
