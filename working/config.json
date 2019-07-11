@@ -1,9 +1,9 @@
 {
     "Version": "0.4.1",
     "Users":
-    [
+    {
+        "0":
         {
-            "Id": 0,
             "Mail": "None",
             "Name": "None",
             "Token": "None",
@@ -23,64 +23,64 @@
                 "DeleteComment": true
             }
         }
-    ],
+    },
     "Modules":
-    [
+    {
+        "0":
         {
-            "Id": 0,
             "Name": "Home",
-            "Previous": -1
+            "Previous": "-1"
         },
+        "1":
         {
-            "Id": 1,
             "Name": "About",
-            "Previous": 0
+            "Previous": "0"
         }
-    ],
+    },
     "Articles":
-    [
+    {
+        "0":
         {
-            "Id": 0,
             "Path": "articles/welcome",
             "Title": "Welcome",
-            "AuthorId": 0,
+            "AuthorId": "0",
             "DateTime": "2000/00/00-00:00:00",
-            "ModuleId": 0
+            "ModuleId": "0"
         }
-    ],
+    },
     "Comments":
-    [
+    {
+        "0":
         {
-            "Id": 0,
             "Content": "Main comment",
-            "BelongsTo": 0,
-            "RepliesTo": -1,
-            "AuthorId": 0,
+            "BelongsTo": "0",
+            "RepliesTo": "-1",
+            "AuthorId": "0",
             "DateTime": "2000/00/00-00:00:00"
         },
+        "1":
         {
-            "Id": 1,
             "Content": "Sub comment 1",
-            "BelongsTo": 0,
-            "RepliesTo": 0,
-            "AuthorId": 0,
+            "BelongsTo": "0",
+            "RepliesTo": "0",
+            "AuthorId": "0",
             "DateTime": "2000/00/00-00:00:00"
         },
+        "2":
         {
-            "Id": 2,
             "Content": "Sub comment 2",
-            "BelongsTo": 0,
-            "RepliesTo": 1,
-            "AuthorId": 0,
+            "BelongsTo": "0",
+            "RepliesTo": "1",
+            "AuthorId": "0",
             "DateTime": "2000/00/00-00:00:00"
         },
+        "3":
         {
-            "Id": 3,
             "Content": "Another comment",
-            "BelongsTo": 0,
-            "RepliesTo": -1,
-            "AuthorId": 0,
+            "BelongsTo": "0",
+            "RepliesTo": "-1",
+            "AuthorId": "0",
             "DateTime": "2000/00/00-00:00:00"
         }
-   ]
+   }
 }
