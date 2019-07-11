@@ -4,18 +4,27 @@ import (
     "blogkit/config"
 )
 
-func CheckModuleExistById(id int) bool {
-    for _, v := range config.Cfg.Modules {
-        if v.Id == id {
+func CheckModuleExistById(id string) bool {
+    for k, _ := range config.Cfg.Modules {
+        if k == id {
             return true
         }
     }
     return false
 }
 
-func CheckArticleExistById(id int) bool {
-    for _, v := range config.Cfg.Articles {
-        if v.Id == id {
+func CheckArticleExistById(id string) bool {
+    for k, _ := range config.Cfg.Articles {
+        if k == id {
+            return true
+        }
+    }
+    return false
+}
+
+func CheckCommentExistById(id string) bool {
+    for k, _ := range config.Cfg.Comments {
+        if k == id {
             return true
         }
     }
@@ -40,9 +49,9 @@ func CheckUserExistByName(name string) bool {
     return false
 }
 
-func CheckUserExistById(id int) bool {
-    for _, v := range config.Cfg.Users {
-        if v.Id == id {
+func CheckUserExistById(id string) bool {
+    for k, _ := range config.Cfg.Users {
+        if k == id {
             return true
         }
     }

@@ -4,7 +4,7 @@ import (
     "blogkit/config"
 )
 
-func RenderPage(moduleId int, isLogin bool, loginId int) string {
+func RenderPage(moduleId string, isLogin bool, loginId string) string {
     result :=
 `<html>
 <head>

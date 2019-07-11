@@ -1,11 +1,10 @@
 package render
 
 import (
-    "strconv"
     "blogkit/config"
 )
 
-func RenderArticle(articleId int, isLogin bool, loginId int) string {
+func RenderArticle(articleId string, isLogin bool, loginId string) string {
     result :=
 `<html>
 <head>
@@ -16,7 +15,7 @@ func RenderArticle(articleId int, isLogin bool, loginId int) string {
     result += renderLogin(isLogin, loginId)
     moduleId := config.Cfg.Articles[articleId].ModuleId
     result +=
-`    <a href='module?id=` + strconv.Itoa(moduleId) + `'><b>...(` + config.Cfg.Modules[moduleId].Name + `)</b></a><br>
+`    <a href='module?id=` + moduleId + `'><b>...(` + config.Cfg.Modules[moduleId].Name + `)</b></a><br>
 `
     result +=
 `    <h1>` + config.Cfg.Articles[articleId].Title + `</h1>

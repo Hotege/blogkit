@@ -4,14 +4,13 @@ var Cfg Config
 
 type Config struct {
     Version string `json:Version`
-    Users []User `json:Users`
-    Modules []Module `json:Modules`
-    Articles []Article `json:Articles`
-    Comments []Comment `json:Comments`
+    Users map[string]*User `json:Users`
+    Modules map[string]*Module `json:Modules`
+    Articles map[string]*Article `json:Articles`
+    Comments map[string]*Comment `json:Comments`
 }
 
 type User struct {
-    Id int `json:ID`
     Mail string `json:Mail`
     Name string `json:Name`
     Token string `json:Token`
@@ -34,25 +33,22 @@ type Permission struct {
 }
 
 type Module struct {
-    Id int `json:ID`
     Name string `json:Name`
-    Previous int `json:Previous`
+    Previous string `json:Previous`
 }
 
 type Article struct {
-    Id int `json:ID`
     Path string `json:Path`
     Title string `json:Title`
-    AuthorId int `json:AuthorID`
+    AuthorId string `json:AuthorID`
     DateTime string `json:DateTime`
-    ModuleId int `json:ModuleID`
+    ModuleId string `json:ModuleID`
 }
 
 type Comment struct {
-    Id int `json:ID`
     Content string `json:Content`
-    BelongsTo int `json:BelongsTo`
-    RepliesTo int `json:RepliesTo`
-    AuthorId int `json:AuthorID`
+    BelongsTo string `json:BelongsTo`
+    RepliesTo string `json:RepliesTo`
+    AuthorId string `json:AuthorID`
     DateTime string `json:DateTime`
 }

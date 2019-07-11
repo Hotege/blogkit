@@ -5,6 +5,7 @@ import (
     "encoding/hex"
     "encoding/json"
     "io/ioutil"
+    "strconv"
     "time"
 )
 
@@ -22,41 +23,83 @@ func getPasswordHash(password string) string {
 }
 
 func UpdateAdmin(mail string, name string, password string) {
-    Cfg.Users[0].Mail = mail
-    Cfg.Users[0].Name = name
-    Cfg.Users[0].Token = getPasswordHash(password)
+    Cfg.Users["0"].Mail = mail
+    Cfg.Users["0"].Name = name
+    Cfg.Users["0"].Token = getPasswordHash(password)
 }
 
 func AddNewUser(mail string, name string, password string) {
     var u User
-    u.Id = Cfg.Users[len(Cfg.Users) - 1].Id + 1
     u.Mail = mail
     u.Name = name
     u.Token = getPasswordHash(password)
     u.Permissions.CreateComment = true
-    Cfg.Users = append(Cfg.Users, u)
+    id := "-1"
+    for k, _ := range Cfg.Users {
+        kid, _ := strconv.Atoi(k)
+        iid, _ := strconv.Atoi(id)
+        if kid > iid {
+            id = k
+        }
+    }
+    final, _ := strconv.Atoi(id)
+    Cfg.Users[strconv.Itoa(final + 1)] = &u
 }
 
-func CreateComment(content string, belongsTo int, repliesTo int, authorId int) {
+func CreateModule(name string, previous string) {
+    var m Module
+    m.Name = name
+    m.Previous = previous
+    id := "-1"
+    for k, _ := range Cfg.Modules {
+        kid, _ := strconv.Atoi(k)
+        iid, _ := strconv.Atoi(id)
+        if kid > iid {
+            id = k
+        }
+    }
+    final, _ := strconv.Atoi(id)
+    Cfg.Modules[strconv.Itoa(final + 1)] = &m
+}
+
+func EditModule(id string, name string, previous string) {
+    Cfg.Modules[id].Name = name
+    Cfg.Modules[id].Previous = previous
+}
+
+func DeleteModule(id string) {
+    for k, v := range Cfg.Modules {
+        if v.Previous == id {
+            DeleteModule(k)
+        }
+    }
+    delete(Cfg.Modules, id)
+}
+
+func CreateComment(content string, belongsTo string, repliesTo string, authorId string) {
     var c Comment
-    c.Id = Cfg.Comments[len(Cfg.Comments) - 1].Id + 1
     c.Content = content
     c.BelongsTo = belongsTo
     c.RepliesTo = repliesTo
     c.AuthorId = authorId
     c.DateTime = time.Now().Format("2006/01/02-15:04:05")
-    Cfg.Comments = append(Cfg.Comments, c)
-}
-
-func DeleteComment(id int) {
-    dId := -1
-    for k, v := range Cfg.Comments {
-        if v.Id == id {
-            dId = k
-            break
+    id := "-1"
+    for k, _ := range Cfg.Comments {
+        kid, _ := strconv.Atoi(k)
+        iid, _ := strconv.Atoi(id)
+        if kid > iid {
+            id = k
         }
     }
-    if dId != -1 {
-        Cfg.Comments = append(Cfg.Comments[:dId], Cfg.Comments[dId + 1:]...)
+    final, _ := strconv.Atoi(id)
+    Cfg.Comments[strconv.Itoa(final + 1)] = &c
+}
+
+func DeleteComment(id string) {
+    for k, v := range Cfg.Comments {
+        if v.RepliesTo == id {
+            DeleteComment(k)
+        }
     }
+    delete(Cfg.Comments, id)
 }

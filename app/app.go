@@ -7,7 +7,6 @@ import (
     "io/ioutil"
     "os"
     "strings"
-    "strconv"
     "blogkit/config"
     "blogkit/render"
     "blogkit/data"
@@ -34,7 +33,7 @@ func Run() {
             loginCookie = &newCookie
         }
         if dir[1] == "initialize" {
-            if config.Cfg.Users[0].Token == "None" {
+            if config.Cfg.Users["0"].Token == "None" {
                 if r.Method == "GET" {
                     io.WriteString(w, render.RenderInitialize())
                     return
@@ -56,7 +55,7 @@ func Run() {
             }
         }
         if dir[1] == "login" {
-            if config.Cfg.Users[0].Token == "None" {
+            if config.Cfg.Users["0"].Token == "None" {
                 http.Redirect(w, r, "/initialize", http.StatusFound)
                 return
             } else {
@@ -66,7 +65,7 @@ func Run() {
                     if success {
                         newCookie := http.Cookie {
                             Name: "user_login",
-                            Value: "login:true,id:" + strconv.Itoa(id),
+                            Value: "login:true,id:" + id,
                         }
                         http.SetCookie(w, &newCookie)
                         loginCookie = &newCookie
@@ -79,7 +78,7 @@ func Run() {
             return
         }
         if dir[1] == "signup" {
-            if config.Cfg.Users[0].Token == "None" {
+            if config.Cfg.Users["0"].Token == "None" {
                 http.Redirect(w, r, "/initialize", http.StatusFound)
                 return
             } else {
@@ -105,7 +104,7 @@ func Run() {
             }
         }
         if dir[1] == "logout" {
-            if config.Cfg.Users[0].Token == "None" {
+            if config.Cfg.Users["0"].Token == "None" {
                 http.Redirect(w, r, "/initialize", http.StatusFound)
                 return
             } else {
@@ -120,26 +119,63 @@ func Run() {
             }
         }
         if strings.Split(dir[1], "?")[0] == "module" {
-            if config.Cfg.Users[0].Token == "None" {
+            if config.Cfg.Users["0"].Token == "None" {
                 http.Redirect(w, r, "/initialize", http.StatusFound)
                 return
             } else {
                 r.ParseForm()
                 login_data := strings.Split(strings.Trim(strings.Split(loginCookie.String(), "=")[1], "\""), ",")
                 isLogin := strings.Split(login_data[0], ":")[1]
-                loginId, _ := strconv.Atoi(strings.Split(login_data[1], ":")[1])
+                loginId := strings.Split(login_data[1], ":")[1]
                 if _, ok := r.Form["id"]; ok {
-                    id, _ := strconv.Atoi(r.Form["id"][0])
-                    if id == 0 {
-                        http.Redirect(w, r, "/", http.StatusFound)
-                        return
+                    id := r.Form["id"][0]
+                    if r.Method == "GET" {
+                        if id == "0" {
+                            http.Redirect(w, r, "/", http.StatusFound)
+                            return
+                        }
+                        if data.CheckModuleExistById(id) {
+                            io.WriteString(w, render.RenderPage(id, isLogin == "true", loginId))
+                            return
+                        } else {
+                            io.WriteString(w, render.RenderError("Page not found."))
+                            return
+                        }
                     }
-                    if data.CheckModuleExistById(id) {
-                        io.WriteString(w, render.RenderPage(id, isLogin == "true", loginId))
-                        return
-                    } else {
-                        io.WriteString(w, render.RenderError("Page not found."))
-                        return
+                    if r.Method == "POST" {
+                        if isLogin != "true" {
+                            io.WriteString(w, render.RenderError("Need login."))
+                            return
+                        }
+                        if !data.CheckUserExistById(loginId) {
+                            newCookie := http.Cookie {
+                                Name: "user_login",
+                                Value: "login:false,id:0",
+                            }   
+                            http.SetCookie(w, &newCookie)
+                            loginCookie = &newCookie
+                            io.WriteString(w, render.RenderError("User error."))
+                            return
+                        }
+                        if data.CheckModuleExistById(id) {
+                            if r.Form["do"][0] == "edit" {
+                                if r.PostForm["module_edit_type"][0] == "create" {
+                                    config.CreateModule(r.PostForm["module_edit_name"][0], r.PostForm["module_edit_pid"][0])
+                                }
+                                if r.PostForm["module_edit_type"][0] == "edit" {
+                                    config.EditModule(r.PostForm["module_edit_id"][0], r.PostForm["module_edit_name"][0], r.PostForm["module_edit_pid"][0])
+                                }
+                            }
+                            if r.Form["do"][0] == "delete" {
+                                config.DeleteModule(r.PostForm["delete_id"][0])
+                            }
+                            config.UpdateFile()
+                            http.Redirect(w, r, "/module?id=" + r.Form["id"][0], http.StatusFound)
+                            return
+                        } else {
+                            io.WriteString(w, render.RenderError("Page not found."))
+                            return
+                        }
                     }
                 } else {
                     http.Redirect(w, r, "/", http.StatusFound)
@@ -148,16 +184,16 @@ func Run() {
             }
         }
         if strings.Split(dir[1], "?")[0] == "article" {
-            if config.Cfg.Users[0].Token == "None" {
+            if config.Cfg.Users["0"].Token == "None" {
                 http.Redirect(w, r, "/initialize", http.StatusFound)
                 return
             } else {
                 r.ParseForm()
                 login_data := strings.Split(strings.Trim(strings.Split(loginCookie.String(), "=")[1], "\""), ",")
                 isLogin := strings.Split(login_data[0], ":")[1]
-                loginId, _ := strconv.Atoi(strings.Split(login_data[1], ":")[1])
+                loginId := strings.Split(login_data[1], ":")[1]
                 if _, ok := r.Form["id"]; ok {
-                    id, _ := strconv.Atoi(r.Form["id"][0])
+                    id := r.Form["id"][0]
                     if r.Method == "GET" {
                         if data.CheckArticleExistById(id) {
                             io.WriteString(w, render.RenderArticle(id, isLogin == "true", loginId))
@@ -183,16 +219,16 @@ func Run() {
                             return
                         }
                         if data.CheckArticleExistById(id) {
-                            if r.Form["do"][0] == "main_comment" {
-                                config.CreateComment(r.PostForm["main_comment_content"][0], id, -1, loginId)
-                            }
                             if r.Form["do"][0] == "reply_comment" {
-                                replyId, _ := strconv.Atoi(r.PostForm["reply_id"][0])
-                                config.CreateComment(r.PostForm["reply_comment_content"][0], id, replyId, loginId)
+                                if r.PostForm["reply_type"][0] == "new" {
+                                    config.CreateComment(r.PostForm["reply_comment_content"][0], id, "-1", loginId)
+                                }
+                                if r.PostForm["reply_type"][0] == "reply" {
+                                    config.CreateComment(r.PostForm["reply_comment_content"][0], id, r.PostForm["reply_id"][0], loginId)
+                                }
                             }
                             if r.Form["do"][0] == "delete_comment" {
-                                deleteId, _ := strconv.Atoi(r.PostForm["delete_id"][0])
-                                config.DeleteComment(deleteId)
+                                config.DeleteComment(r.PostForm["delete_id"][0])
                             }
                             config.UpdateFile()
                             http.Redirect(w, r, "/article?id=" + r.Form["id"][0], http.StatusFound)
@@ -209,14 +245,14 @@ func Run() {
             }
         }
         if dir[1] == "" {
-            if config.Cfg.Users[0].Token == "None" {
+            if config.Cfg.Users["0"].Token == "None" {
                 http.Redirect(w, r, "/initialize", http.StatusFound)
                 return
             }
             login_data := strings.Split(strings.Trim(strings.Split(loginCookie.String(), "=")[1], "\""), ",")
             isLogin := strings.Split(login_data[0], ":")[1]
-            loginId, _ := strconv.Atoi(strings.Split(login_data[1], ":")[1])
-            io.WriteString(w, render.RenderPage(0, isLogin == "true", loginId))
+            loginId := strings.Split(login_data[1], ":")[1]
+            io.WriteString(w, render.RenderPage("0", isLogin == "true", loginId))
             return
         }
         http.Redirect(w, r, "/", http.StatusFound)

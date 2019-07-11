@@ -1,12 +1,29 @@
 package render
 
 import (
+    "sort"
     "strconv"
     "blogkit/config"
     "blogkit/data"
 )
 
-func renderLogin(isLogin bool, loginId int) string {
+type ByDemical []string
+
+func (a ByDemical) Len() int {
+    return len(a)
+}
+
+func (a ByDemical) Swap(i, j int) {
+    a[i], a[j] = a[j], a[i]
+}
+
+func (a ByDemical) Less(i, j int) bool {
+    x, _ := strconv.Atoi(a[i])
+    y, _ := strconv.Atoi(a[j])
+    return x < y
+}
+
+func renderLogin(isLogin bool, loginId string) string {
     result := ""
     if isLogin {
         result +=
@@ -27,21 +44,108 @@ func renderLogin(isLogin bool, loginId int) string {
     return result
 }
 
-func renderModule(id int, isLogin bool, loginId int) string {
+func renderModule(id string, isLogin bool, loginId string) string {
     result := ""
-    if id != 0 {
+    if id != "0" {
         previousId := config.Cfg.Modules[id].Previous
         result +=
-`    <a href='module?id=` + strconv.Itoa(previousId) + `'><h4>...(` + config.Cfg.Modules[previousId].Name + `)</h4></a>
+`    <a href='module?id=` + previousId + `'><h4>...(` + config.Cfg.Modules[previousId].Name + `)</h4></a>
+`
+    }
+    if isLogin {
+        result +=
+`    <script>
+        function showModuleEditor(id, hId, mId, pId, value, type) {
+            document.getElementById(hId).style.display = "block";
+            document.getElementById(hId).style.height = document.body.clientHeight + "px";
+            document.getElementById(id).style.display = "block";
+            document.getElementById('module_edit_id').value = mId;
+            document.getElementById('module_edit_pid').value = pId;
+            document.getElementById('module_edit_name').value = value;
+            document.getElementById('module_edit_type').value = type;
+            var options = document.getElementById('select_previous');
+            for (i = 0; i < options.length; i++) {
+                if (options[i].id == pId) {
+                    options[i].selected = true;
+                    break;
+                }
+            }
+            document.getElementById('module_edit_name').focus();
+        }
+        function hideModuleEditor(id, hId) {
+            document.getElementById(hId).style.display = "none";
+            document.getElementById(id).style.display = "none";
+        }
+        function submitModuleEditor(id, hId) {
+            hideModuleEditor(id, hId);
+            document.getElementById("module_form").submit();
+        }
+        function deleteModule(mId) {
+            var msg = confirm("Will you delete this module?");
+            if (msg) {
+                document.getElementById("delete_id").value = mId;
+                document.getElementById("delete_form").submit();
+            }
+        }
+    </script>
+    <div id='hidebg' style='position: absolute; left: 0px; top: 0px; background-color: #000000; width: 100%; filter: alpha(opacity=60); opacity: 0.6; z-index: 2;'></div>
+    <div id='module_editor' style='position: absolute; left: 30%; top: 200px; background-color: #fff; border: 1px solid black; display: none; z-index: 3;'>
+        <form id='module_form' action='module?id=` + id + `&do=edit' method='POST'>
+            <input id='module_edit_type' name='module_edit_type' readonly='readonly' style='display: none;' />
+            <input id='module_edit_id' name='module_edit_id' readonly='readonly' style='display: none;' />
+            <input id='module_edit_pid' name='module_edit_pid' readonly='readonly' style='display: none;' />
+            <span>Module name: <input id='module_edit_name' name='module_edit_name' /></span><br>
+            <span>Previous module: 
+                <select id='select_previous'>
+                    <option id='NONE' value='NONE'>NONE</option>
+`
+        for k, v := range config.Cfg.Modules {
+            result +=
+`                    <option id='` + k + `' value='` + v.Name + `'>` + v.Name + `</option>
+`
+        }
+        result +=
+`
+                </select>
+            </span><br>
+            <div style='display: inline-block; background-color: blue; cursor: pointer;' onclick='submitModuleEditor("module_editor", "hidebg");'>submit</div>
+            <div style='display: inline-block; background-color: pink; cursor: pointer;' onclick='hideModuleEditor("module_editor", "hidebg");'>cancel</div>
+        </form>
+    </div>
 `
     }
     result +=
-`    <h3>` + config.Cfg.Modules[id].Name + `</h3>
+`    <h3>` + config.Cfg.Modules[id].Name + `</h3>`
+    if isLogin {
+        result += `    <span>`
+        if config.Cfg.Users[loginId].Permissions.CreateModule {
+            result += ` <a href='javascript:showModuleEditor("module_editor", "hidebg", "-1", "` + id + `", "", "create");'>Create</a>`
+        }
+        if config.Cfg.Users[loginId].Permissions.EditModule {
+            previousId := config.Cfg.Modules[id].Previous
+            result += ` <a href='javascript:showModuleEditor("module_editor", "hidebg", "` + id + `", "` + previousId + `", "` + config.Cfg.Modules[id].Name + `", "edit");'>Edit</a>`
+        }
+        if config.Cfg.Users[loginId].Permissions.DeleteComment {
+            result +=
+`    <div style='display: none;'>
+        <form id='delete_form' action='module?id=` + id + `&do=delete' method='POST'>
+            <input id='delete_id' name='delete_id' readonly='readonly' />
+        </form>
+    </div>
 `
-    for _, v := range config.Cfg.Articles {
+        }
+        result += `</span><br>`
+    }
+    var keysArticles = make([]string, 0)
+    for k, _ := range config.Cfg.Articles {
+        keysArticles = append(keysArticles, k)
+    }
+    sort.Sort(ByDemical(keysArticles))
+    for _, k := range keysArticles {
+        v := config.Cfg.Articles[k]
         if v.ModuleId == id {
             result +=
-`    <a href='article?id=` + strconv.Itoa(v.Id) + `'><b>` + v.Title + `</b></a>`
+`    <a href='article?id=` + k + `'><b>` + v.Title + `</b></a>`
             result += `<span>`
             if isLogin {
                 if config.Cfg.Users[loginId].Permissions.EditArticle {
@@ -55,36 +159,43 @@ func renderModule(id int, isLogin bool, loginId int) string {
 `
         }
     }
-    for _, v := range config.Cfg.Modules {
+    var keysModules = make([]string, 0)
+    for k, _ := range config.Cfg.Modules {
+        keysModules = append(keysModules, k)
+    }
+    sort.Sort(ByDemical(keysModules))
+    for _, k := range keysModules {
+        v := config.Cfg.Modules[k]
         if v.Previous == id {
             result +=
-`    <a href='module?id=` + strconv.Itoa(v.Id) + `'><b>` + v.Name + `</b></a><br>
+`    <a href='module?id=` + k + `'><b>` + v.Name + `</b></a>`
+            result += `<span>`
+            if isLogin {
+                if config.Cfg.Users[loginId].Permissions.EditModule {
+                    result += ` <a href='javascript:showModuleEditor("module_editor", "hidebg", "` + k + `", "` + v.Previous + `", "` + v.Name + `", "edit")'>Edit</a>`
+                }
+                if config.Cfg.Users[loginId].Permissions.DeleteModule {
+                    result += ` <a href='javascript:deleteModule("` + k + `");'>Delete</a>`
+                }
+            }
+            result += `</span><br>
 `
         }
     }
     return result
 }
 
-func renderArticle(id int, isLogin bool, loginId int) string {
+func renderArticle(id string, isLogin bool, loginId string) string {
     result := ""
     result +=
 `    <script>
-        function setMainComment(id, tId, context) {
-            var obj = document.getElementById(id);
-            if (obj.style.display == "none") {
-                obj.style.display = "block";
-                document.getElementById(tId).innerHTML = "Hide";
-            } else {
-                obj.style.display = "none";
-                document.getElementById(tId).innerHTML = context;
-            }   
-        }   
-        function showReplyComment(id, hId, rId) {
+        function showReplyComment(id, hId, rId, type) {
             var obj = document.getElementById(id);
             document.getElementById(hId).style.display = "block";
             document.getElementById(hId).style.height = document.body.clientHeight + "px";
             obj.style.display = "block";
             document.getElementById('reply_id').value = rId;
+            document.getElementById('reply_type').value = type;
             document.getElementById('reply_comment_content').focus();
         }
         function hideReplyComment(id, hId) {
@@ -108,11 +219,10 @@ func renderArticle(id int, isLogin bool, loginId int) string {
         if config.Cfg.Users[loginId].Permissions.CreateComment {
             result +=
 `    <div id='hidebg' style='position: absolute; left: 0px; top: 0px; background-color: #000000; width: 100%; filter: alpha(opacity=60); opacity: 0.6; z-index: 2;'></div>
-`
-            result +=
-`    <div id='reply_comment' style='position: absolute; left: 30%; top: 200px; background-color: #fff; border: 1px solid black; display: none; z-index: 3;'>
-        <form id='reply_form' action='article?id=` + strconv.Itoa(id) + `&do=reply_comment' method='POST'>
+    <div id='reply_comment' style='position: absolute; left: 30%; top: 200px; background-color: #fff; border: 1px solid black; display: none; z-index: 3;'>
+        <form id='reply_form' action='article?id=` + id + `&do=reply_comment' method='POST'>
             <span><input id='reply_id' name='reply_id' readonly='readonly' style='display: none;' />
+            <input id='reply_type' name='reply_type' readonly='readonly' style='display: none;' />
             <div style='display: inline-block; cursor: pointer;' onclick='hideReplyComment("reply_comment", "hidebg");'>X</div></span><br>
             <span>content:</span><br>
             <textarea id='reply_comment_content' name='reply_comment_content' style='resize: none; width: 320px; height: 160px;'></textarea><br>
@@ -124,7 +234,7 @@ func renderArticle(id int, isLogin bool, loginId int) string {
         if config.Cfg.Users[loginId].Permissions.DeleteComment {
             result +=
 `    <div style='display: none;'>
-        <form id='delete_form' action='article?id=` + strconv.Itoa(id) + `&do=delete_comment' method='POST'>
+        <form id='delete_form' action='article?id=` + id + `&do=delete_comment' method='POST'>
             <input id='delete_id' name='delete_id' readonly='readonly' />
         </form>
     </div>
@@ -148,49 +258,58 @@ func renderArticle(id int, isLogin bool, loginId int) string {
     if isLogin {
         if config.Cfg.Users[loginId].Permissions.CreateComment {
             result +=
-`    <span><a id='main_comment_set' href='javascript:setMainComment("main_comment", "main_comment_set", "New comment");'>New comment</a></span><br>
-    <div id='main_comment' style='display: none;'>
-        <form action='article?id=` + strconv.Itoa(id) + `&do=main_comment' method='POST'>
-            <textarea name='main_comment_content' style='resize: none; width: 320px; height: 160px;'></textarea><br>
-            <input type='submit' value='submit' />
-        </form>
-    </div>
+`    <span><a id='main_comment_set' href='javascript:showReplyComment("reply_comment", "hidebg", "-1", "new");'>New comment</a></span><br>
 `
         }
     }
-    for _, v := range config.Cfg.Comments {
-        if v.BelongsTo == id && v.RepliesTo == -1 {
+    var keys = make([]string, 0)
+    for k, _ := range config.Cfg.Comments {
+        keys = append(keys, k)
+    }
+    sort.Sort(ByDemical(keys))
+    for _, k := range keys {
+        v := config.Cfg.Comments[k]
+        if v.BelongsTo == id && v.RepliesTo == "-1" {
             result +=
 `    <b>` + config.Cfg.Users[v.AuthorId].Name + ": " + v.Content + " - " + v.DateTime + `</b>`
             if isLogin {
                 if config.Cfg.Users[loginId].Permissions.CreateComment {
-                    replyId := "reply_" + strconv.Itoa(v.Id)
-                    result += `<span> <a id='` + replyId + `' href='javascript:showReplyComment("reply_comment", "hidebg", "` + strconv.Itoa(v.Id) + `");'>Reply</a></span>`
+                    replyId := "reply_" + k
+                    result += `<span> <a id='` + replyId + `' href='javascript:showReplyComment("reply_comment", "hidebg", "` + k + `", "reply");'>Reply</a></span>`
                 }
                 if config.Cfg.Users[loginId].Permissions.DeleteComment {
-                    result += `<span> <a href='javascript:deleteComment(` + strconv.Itoa(v.Id) + `);'>Delete</a></span>`
+                    result += `<span> <a href='javascript:deleteComment(` + k + `);'>Delete</a></span>`
                 }
             }
             result += `<br>
 `
-            for _, sub := range config.Cfg.Comments {
-                if sub.BelongsTo == id && sub.RepliesTo != -1 {
-                    previousId := sub.Id
+            for _, sk := range keys {
+                sub := config.Cfg.Comments[sk]
+                if sub.BelongsTo == id && sub.RepliesTo != "-1" {
+                    previousId := sk
                     check := false
-                    for config.Cfg.Comments[previousId].RepliesTo != -1 {
+                    _, ok := config.Cfg.Comments[previousId]
+                    if !ok {
+                        continue
+                    }
+                    for config.Cfg.Comments[previousId].RepliesTo != "-1" {
                         previousId = config.Cfg.Comments[previousId].RepliesTo
                     }
-                    check = config.Cfg.Comments[previousId].Id == v.Id
+                    if !data.CheckCommentExistById(previousId) {
+                        continue
+                    }
+                    check = previousId == k
                     if check {
                         result +=
 `    <span>` + config.Cfg.Users[sub.AuthorId].Name + ": " + sub.Content + " - " + sub.DateTime + `</span>`
                         if isLogin {
                             if config.Cfg.Users[loginId].Permissions.CreateComment {
-                                replyId := "reply_" + strconv.Itoa(sub.Id)
-                                result += `<span> <a id='` + replyId + `' href='javascript:showReplyComment("reply_comment", "hidebg", "` + strconv.Itoa(sub.Id) + `");'>Reply</a></span>`
+                                replyId := "reply_" + sk
+                                result +=
+`<span> <a id='` + replyId + `' href='javascript:showReplyComment("reply_comment", "hidebg", "` + sk + `", "reply");'>Reply</a></span>`
                             }
                             if config.Cfg.Users[loginId].Permissions.DeleteComment {
-                                result += `<span> <a href='javascript:deleteComment(` + strconv.Itoa(sub.Id) + `)'>Delete</a></span>`
+                                result += `<span> <a href='javascript:deleteComment(` + sk + `)'>Delete</a></span>`
                             }
                         }
                         result += `<br>
