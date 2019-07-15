@@ -259,6 +259,14 @@ func Run() {
                 login_data := strings.Split(strings.Trim(strings.Split(loginCookie.String(), "=")[1], "\""), ",")
                 isLogin := strings.Split(login_data[0], ":")[1]
                 loginId := strings.Split(login_data[1], ":")[1]
+                if isLogin != "true" {
+                    io.WriteString(w, render.RenderError("Need login."))
+                    return
+                }
+                if !config.Cfg.Users[loginId].Permissions.CreateArticle {
+                    io.WriteString(w, render.RenderError("No permission(s)."))
+                    return
+                }
                 id := "-1"
                 moduleId := "0"
                 if _, okModule := r.Form["module"]; okModule {
@@ -268,8 +276,10 @@ func Run() {
                     id = r.Form["id"][0]
                 }
                 if r.Method == "GET" {
-                    io.WriteString(w, render.RenderCreate(id, moduleId, isLogin == "true", loginId))
-                    return
+                    if id == "-1" {
+                        io.WriteString(w, render.RenderCreate(id, moduleId, isLogin == "true", loginId))
+                        return
+                    }
                 }
                 if r.Method == "POST" {
                     filepath := config.CreateArticle(
@@ -288,8 +298,16 @@ func Run() {
                 return
             }
             login_data := strings.Split(strings.Trim(strings.Split(loginCookie.String(), "=")[1], "\""), ",")
-            //isLogin := strings.Split(login_data[0], ":")[1]
+            isLogin := strings.Split(login_data[0], ":")[1]
             loginId := strings.Split(login_data[1], ":")[1]
+            if isLogin != "true" {
+                io.WriteString(w, render.RenderError("Need login."))
+                return
+            }
+            if !config.Cfg.Users[loginId].Permissions.CreateArticle {
+                io.WriteString(w, render.RenderError("No permission(s)."))
+                return
+            }
             reader, _ := r.MultipartReader()
             filename := ""
             files := make([]string, 0);
@@ -316,8 +334,16 @@ func Run() {
                 return
             }   
             login_data := strings.Split(strings.Trim(strings.Split(loginCookie.String(), "=")[1], "\""), ",")
-            //isLogin := strings.Split(login_data[0], ":")[1]
+            isLogin := strings.Split(login_data[0], ":")[1]
             loginId := strings.Split(login_data[1], ":")[1]
+            if isLogin != "true" {
+                io.WriteString(w, render.RenderError("Need login."))
+                return
+            }
+            if !config.Cfg.Users[loginId].Permissions.CreateArticle {
+                io.WriteString(w, render.RenderError("No permission(s)."))
+                return
+            }
             reader, _ := r.MultipartReader()
             files := make([]string, 0)
             for {
