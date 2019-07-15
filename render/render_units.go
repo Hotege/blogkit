@@ -87,8 +87,15 @@ func renderModule(id string, isLogin bool, loginId string) string {
                 document.getElementById("delete_form").submit();
             }
         }
+        function deleteArticle(aId) {
+            var msg = confirm("Will you delete this module?");
+            if (msg) {
+                document.getElementById("delete_article_id").value = aId;
+                document.getElementById("delete_article_form").submit();
+            }
+        }
     </script>
-    <div id='hidebg' style='position: absolute; left: 0px; top: 0px; background-color: #000000; width: 100%; filter: alpha(opacity=60); opacity: 0.6; z-index: 2;'></div>
+    <div id='hidebg' style='position: absolute; left: 0px; top: 0px; background-color: #000; width: 100%; filter: alpha(opacity=60); opacity: 0.6; z-index: 2;'></div>
     <div id='module_editor' style='position: absolute; left: 30%; top: 200px; background-color: #fff; border: 1px solid black; display: none; z-index: 3;'>
         <form id='module_form' action='module?id=` + id + `&do=edit' method='POST'>
             <input id='module_edit_type' name='module_edit_type' readonly='readonly' style='display: none;' />
@@ -97,7 +104,6 @@ func renderModule(id string, isLogin bool, loginId string) string {
             <span>Module name: <input id='module_edit_name' name='module_edit_name' /></span><br>
             <span>Previous module: 
                 <select id='select_previous'>
-                    <option id='NONE' value='NONE'>NONE</option>
 `
         for k, v := range config.Cfg.Modules {
             result +=
@@ -131,6 +137,9 @@ func renderModule(id string, isLogin bool, loginId string) string {
         <form id='delete_form' action='module?id=` + id + `&do=delete' method='POST'>
             <input id='delete_id' name='delete_id' readonly='readonly' />
         </form>
+        <form id='delete_article_form' action='module?id=` + id + `&do=delete_article' method='POST'>
+            <input id='delete_article_id' name='delete_article_id' readonly='readonly' />
+        </form>
     </div>
 `
         }
@@ -149,10 +158,10 @@ func renderModule(id string, isLogin bool, loginId string) string {
             result += `<span>`
             if isLogin {
                 if config.Cfg.Users[loginId].Permissions.EditArticle {
-                    result += ` <a href='#'>Edit</a>`
+                    result += ` <a href='create?do=edit&id=` + k + `'>Edit</a>`
                 }
                 if config.Cfg.Users[loginId].Permissions.DeleteArticle {
-                    result += ` <a href='#'>Delete</a>`
+                    result += ` <a href='javascript:deleteArticle("` + k + `");'>Delete</a>`
                 }
             }
             result += `</span><br>
@@ -218,7 +227,7 @@ func renderArticle(id string, isLogin bool, loginId string) string {
     if isLogin {
         if config.Cfg.Users[loginId].Permissions.CreateComment {
             result +=
-`    <div id='hidebg' style='position: absolute; left: 0px; top: 0px; background-color: #000000; width: 100%; filter: alpha(opacity=60); opacity: 0.6; z-index: 2;'></div>
+`    <div id='hidebg' style='position: absolute; left: 0px; top: 0px; background-color: #000; width: 100%; filter: alpha(opacity=60); opacity: 0.6; z-index: 2;'></div>
     <div id='reply_comment' style='position: absolute; left: 30%; top: 200px; background-color: #fff; border: 1px solid black; display: none; z-index: 3;'>
         <form id='reply_form' action='article?id=` + id + `&do=reply_comment' method='POST'>
             <span><input id='reply_id' name='reply_id' readonly='readonly' style='display: none;' />
@@ -244,10 +253,7 @@ func renderArticle(id string, isLogin bool, loginId string) string {
     result += `    <span>`
     if isLogin {
         if config.Cfg.Users[loginId].Permissions.EditArticle {
-            result += ` <a href='#'>Edit</a>`
-        }
-        if config.Cfg.Users[loginId].Permissions.DeleteArticle {
-            result += ` <a href='#'>Delete</a>`
+            result += ` <a href='create?do=edit&id=` + id + `'>Edit</a>`
         }
     }
     result += `</span><br>
@@ -319,5 +325,139 @@ func renderArticle(id string, isLogin bool, loginId string) string {
             }
         }
     }
+    return result
+}
+
+func renderCreate(moduleId string) string {
+    result := ""
+    result +=
+`    <script>
+        function addStep() {
+            id = document.getElementById('steps_last_id').value;
+            var node = document.getElementById('steps').cloneNode(true);
+            node.id = node.id + id;
+            node.style.display = 'block';
+            var select = node.getElementsByTagName("select")[0];
+            select.id = 'step_s' + id;
+            select.onchange = function() {
+                var oId = this.options[this.options.selectedIndex].id;
+                var sId = select.id.split('step_s')[1];
+                var ch = oId[6];
+                document.getElementById('step_tt' + sId).style.display = 'none';
+                document.getElementById('step_ii' + sId).style.display = 'none';
+                document.getElementById('step_ff' + sId).style.display = 'none';
+                document.getElementById('step_cc' + sId).style.display = 'none';
+                document.getElementById('step_' + ch + ch + sId).style.display = 'block';
+            };
+            var divs = node.getElementsByTagName("div");
+            for (var i = 0; i < divs.length; i++) {
+                if (typeof(divs[i].id) != "undefined") {
+                    divs[i].id = divs[i].id + id;
+                }
+                if (divs[i].id == 'step_tt' + id) {
+                    divs[i].style.display = 'block';
+                }
+                if (divs[i].id == 'step_ii' + id) {
+                    divs[i].style.display = 'none';
+                    var ifs = divs[i].getElementsByTagName("iframe")[0];
+                    ifs.id = ifs.name + id;
+                    ifs.name = ifs.name + id;
+                    var iform = divs[i].getElementsByTagName("form")[0];
+                    iform.id = 'step_i_form' + id;
+                    iform.target = ifs.name;
+                    var ia = divs[i].getElementsByTagName("a")[0];
+                    ia.href = 'javascript:submitFile("step_i_form' + id + '", "step_i_f' + id + '", "step_i_name' + id + '");';
+                    var iname = divs[i].getElementsByTagName("input")[1];
+                    iname.id = iname.id + id;
+                }
+                if (divs[i].id == 'step_ff' + id) {
+                    divs[i].style.display = 'none';
+                    var cfs = divs[i].getElementsByTagName("iframe")[0];
+                    cfs.id = cfs.name + id;
+                    cfs.name = cfs.name + id;
+                    var cform = divs[i].getElementsByTagName("form")[0];
+                    cform.id = 'step_f_form' + id;
+                    cform.target = cfs.name;
+                    var ca = divs[i].getElementsByTagName("a")[0];
+                    ca.href = 'javascript:submitFile("step_f_form' + id + '", "step_f_f' + id + '", "step_f_name' + id + '");';
+                    var fname = divs[i].getElementsByTagName("input")[1];
+                    fname.id = fname.id + id;
+                }
+                if (divs[i].id == 'step_cc' + id) {
+                    divs[i].style.display = 'none';
+                }
+            }
+            var aa = node.getElementsByTagName("a");
+            for (var i = 0; i < aa.length; i++) {
+                if (aa[i].id == 'step_r') {
+                    aa[i].id = aa[i].id + id;
+                    aa[i].href = 'javascript:removeStep("' + node.id + '")';
+                }
+            }
+            document.getElementById('steps_group').appendChild(node);
+            document.getElementById('steps_last_id').value = parseInt(id) + 1;
+        }
+        function removeStep(id) {
+            document.getElementById('steps_group').removeChild(document.getElementById(id));
+        }
+        function submitFile(id, fId, nId) {
+            document.getElementById(id).submit();
+            document.getElementById(fId).onload = function() {
+                var inputs = document.getElementById(fId).contentWindow.document.getElementsByTagName("input");
+                var s = new Array(inputs.length);
+                for (var i = 0; i < inputs.length; i++) {
+                    var layers = inputs[i].value.split('/');
+                    s[i] = layers[layers.length - 1];
+                }
+                document.getElementById(fId).parentNode.getElementsByTagName("input")[1].value = s.join('/');
+            };
+        }
+    </script>
+    <div id='steps' style='display: none; border: 1px solid black;'>
+        <select id='step_s' name='step_s'>
+            <option id='step_ot' value='step_ot'>Text</option>
+            <option id='step_oi' value='step_oi'>Image</option>
+            <option id='step_of' value='step_of'>File</option>
+            <option id='step_oc' value='step_oc'>Code</option>
+        </select>
+        <div id='step_tt' style='display: none;'>
+            <span>Text</span><br>
+            <textarea name='step_ti'></textarea>
+        </div>
+        <div id='step_ii' style='display: none;'>
+            <span>Image</span><br>
+            <iframe name='step_i_f' frameborder='0' height='0'></iframe>
+            <form action='upload_images' enctype='multipart/form-data' method='POST'>
+                <input name='step_i_i' type='file' accept='image/*' /><br>
+                <a>Submit</a>
+            </form>
+            <input id='step_i_name' name='step_ii_ii' style='display: none;' />
+        </div>
+        <div id='step_ff' style='display: none;'>
+            <span>File</span><br>
+            <iframe name='step_f_f' frameborder='0' height='0'></iframe>
+            <form action='upload_files' enctype='multipart/form-data' method='POST'>
+                <input name='step_f_i' type='file' multiple='multiple' /><br>
+                <a>Submit</a>
+            </form>
+            <input id='step_f_name' name='step_ff_fi' style='display: none;' />
+        </div>
+        <div id='step_cc' style='display: none;'>
+            <span>Code</span><br>
+            <textarea name='step_ci'></textarea>
+        </div>
+        <a id='step_r'>Remove</a>
+    </div>
+    <form action='create?module=` + moduleId + `' method='POST'>
+        <p>Title</p>
+        <input id='create_title' name='create_title' />
+        <p>Content</p>
+        <span>Last id: <input id='steps_last_id' value='0' /></span><br>
+        <div id='steps_group'>
+        </div>
+        <a href='javascript:addStep();'>Add content</a>
+        <input type='submit' value='submit' />
+    </form>
+`
     return result
 }

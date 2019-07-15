@@ -1,7 +1,19 @@
 [
     {
-        "Type": "l",
+        "Type": "t",
         "Value": "Welcome to BlogKit!"
+    },
+    {
+        "Type": "i",
+        "Value": "/static/files/blogkit.png"
+    },
+    {
+        "Type": "c",
+        "Value": "python\nprint('======== ========')\nprint('Hello World!')\nprint('======== ========')"
+    },
+    {
+        "Type": "f",
+        "Value": "/static/files/blogkit.zip"
     },
     {
         "Type": "t",

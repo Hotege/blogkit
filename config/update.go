@@ -3,16 +3,9 @@ package config
 import (
     "crypto/sha256"
     "encoding/hex"
-    "encoding/json"
-    "io/ioutil"
     "strconv"
     "time"
 )
-
-func UpdateFile() {
-    output, _ := json.Marshal(Cfg)
-    ioutil.WriteFile("config.json", output, 0666)
-}
 
 func getPasswordHash(password string) string {
     b := sha256.Sum256([]byte(">> primary salt begins <<" + password + ">> primary salt ends <<"))
@@ -68,12 +61,46 @@ func EditModule(id string, name string, previous string) {
 }
 
 func DeleteModule(id string) {
+    for k, v := range Cfg.Articles {
+        if v.ModuleId == id {
+            DeleteArticle(k)
+        }
+    }
     for k, v := range Cfg.Modules {
         if v.Previous == id {
             DeleteModule(k)
         }
     }
     delete(Cfg.Modules, id)
+}
+
+func CreateArticle(moduleId string, authorId string, title string/*, steps []string, texts []string, images []string, files []string, codes []stringi*/) string {
+    var a Article
+    a.Path = "articles/" + strconv.FormatInt(time.Now().UnixNano(), 10) + "-" + authorId
+    a.Title = title
+    a.AuthorId = authorId
+    a.DateTime = time.Now().Format("2006/01/02-15:04:05")
+    a.ModuleId = moduleId
+    id := "-1"
+    for k, _ := range Cfg.Articles {
+        kid, _ := strconv.Atoi(k)
+        iid, _ := strconv.Atoi(id)
+        if kid > iid {
+            id = k
+        }
+    }
+    final, _ := strconv.Atoi(id)
+    Cfg.Articles[strconv.Itoa(final + 1)] = &a
+    return a.Path
+}
+
+func DeleteArticle(id string) {
+    for k, v := range Cfg.Comments {
+        if v.BelongsTo == id {
+            DeleteComment(k)
+        }
+    }
+    delete(Cfg.Articles, id)
 }
 
 func CreateComment(content string, belongsTo string, repliesTo string, authorId string) {

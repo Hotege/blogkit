@@ -16,7 +16,7 @@ func RenderPage(moduleId string, isLogin bool, loginId string) string {
     if isLogin {
         if config.Cfg.Users[loginId].Permissions.CreateArticle {
             result +=
-`    <a href='create_article'><b>New article</b></a><br>
+`    <a href='create?moudle=` + moduleId + `'><b>New article</b></a><br>
 `
         }
     }

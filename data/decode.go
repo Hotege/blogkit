@@ -7,11 +7,6 @@ import (
     "strings"
 )
 
-type articleSlice struct {
-    Type string `json:Type`
-    Value string `json:Value`
-}
-
 func DecodeArticle(path string) string {
     result := ""
     f, _ := os.Open(path)
@@ -25,6 +20,25 @@ func DecodeArticle(path string) string {
                 result +=
 `    <h2>` + v.Value + `</h2>
 `
+            case "i":
+                result +=
+`    <img src='` + v.Value + `' /><br>
+`
+            case "f":
+                layers := strings.Split(v.Value, "/")
+                result +=
+`    <span>Attach file: <a href='` + v.Value + `'>` + layers[len(layers) - 1] + `</a></span><br>
+`
+            case "c":
+                data := strings.Split(v.Value, "\n")
+                result +=
+`    <b>` + data[0] + ` code</b><br>
+`
+                for _, l := range data[1:] {
+                    result +=
+`    <p>` + l + `</p>
+`
+                }
             case "t":
                 fallthrough
             default:

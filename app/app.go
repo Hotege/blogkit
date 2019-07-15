@@ -7,12 +7,15 @@ import (
     "io/ioutil"
     "os"
     "strings"
+    "time"
+    "strconv"
     "blogkit/config"
     "blogkit/render"
     "blogkit/data"
 )
 
 func Run() {
+    http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
     http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
         fmt.Println(r)
         dir := strings.Split(r.URL.String(), "/")
@@ -45,7 +48,7 @@ func Run() {
                         return
                     }
                     config.UpdateAdmin(r.PostForm["init_mail"][0], r.PostForm["init_name"][0], r.PostForm["init_password"][0])
-                    config.UpdateFile()
+                    config.SaveConfig()
                     http.Redirect(w, r, "/", http.StatusFound)
                     return
                 }
@@ -97,7 +100,7 @@ func Run() {
                         return
                     }
                     config.AddNewUser(r.PostForm["signup_mail"][0], r.PostForm["signup_name"][0], r.PostForm["signup_password"][0])
-                    config.UpdateFile()
+                    config.SaveConfig()
                     http.Redirect(w, r, "/", http.StatusFound)
                     return
                 }
@@ -169,7 +172,10 @@ func Run() {
                             if r.Form["do"][0] == "delete" {
                                 config.DeleteModule(r.PostForm["delete_id"][0])
                             }
-                            config.UpdateFile()
+                            if r.Form["do"][0] == "delete_article" {
+                                config.DeleteArticle(r.PostForm["delete_article_id"][0])
+                            }
+                            config.SaveConfig()
                             http.Redirect(w, r, "/module?id=" + r.Form["id"][0], http.StatusFound)
                             return
                         } else {
@@ -230,7 +236,7 @@ func Run() {
                             if r.Form["do"][0] == "delete_comment" {
                                 config.DeleteComment(r.PostForm["delete_id"][0])
                             }
-                            config.UpdateFile()
+                            config.SaveConfig()
                             http.Redirect(w, r, "/article?id=" + r.Form["id"][0], http.StatusFound)
                             return
                         } else {
@@ -243,6 +249,93 @@ func Run() {
                     return
                 }
             }
+        }
+        if strings.Split(dir[1], "?")[0] == "create" {
+            if config.Cfg.Users["0"].Token == "None" {
+                http.Redirect(w, r, "/initialize", http.StatusFound)
+                return
+            } else {
+                r.ParseForm()
+                login_data := strings.Split(strings.Trim(strings.Split(loginCookie.String(), "=")[1], "\""), ",")
+                isLogin := strings.Split(login_data[0], ":")[1]
+                loginId := strings.Split(login_data[1], ":")[1]
+                id := "-1"
+                moduleId := "0"
+                if _, okModule := r.Form["module"]; okModule {
+                    moduleId = r.Form["module"][0]
+                }
+                if _, okDo := r.Form["do"]; okDo {
+                    id = r.Form["id"][0]
+                }
+                if r.Method == "GET" {
+                    io.WriteString(w, render.RenderCreate(id, moduleId, isLogin == "true", loginId))
+                    return
+                }
+                if r.Method == "POST" {
+                    filepath := config.CreateArticle(
+                        moduleId, loginId, r.PostForm["create_title"][0],
+                    )
+                    fmt.Println(filepath)
+                    config.SaveConfig()
+                    result, _ := data.EncodeArticle(r.PostForm["step_s"], r.PostForm["step_ti"], r.PostForm["step_ii_ii"], r.PostForm["step_ff_fi"], r.PostForm["step_ci"])
+                    ioutil.WriteFile(filepath, result, 0666)
+                }
+            }
+        }
+        if dir[1] == "upload_images" {
+            if config.Cfg.Users["0"].Token == "None" {
+                http.Redirect(w, r, "/initialize", http.StatusFound)
+                return
+            }
+            login_data := strings.Split(strings.Trim(strings.Split(loginCookie.String(), "=")[1], "\""), ",")
+            //isLogin := strings.Split(login_data[0], ":")[1]
+            loginId := strings.Split(login_data[1], ":")[1]
+            reader, _ := r.MultipartReader()
+            filename := ""
+            files := make([]string, 0);
+            for {
+                part, err := reader.NextPart()
+                if err == io.EOF {
+                    break
+                }
+                if part.FileName() == "" {
+                } else {
+                    filename = "static/files/" + strconv.FormatInt(time.Now().UnixNano(), 10) + "-" + loginId + "-" + part.FileName()
+                    files = append(files, filename)
+                    dst, _ := os.Create(filename)
+                    defer dst.Close()
+                    io.Copy(dst, part)
+                }
+            }
+            io.WriteString(w, render.RenderFiles(files))
+            return
+        }
+        if dir[1] == "upload_files" {
+            if config.Cfg.Users["0"].Token == "None" {
+                http.Redirect(w, r, "/initialize", http.StatusFound)
+                return
+            }   
+            login_data := strings.Split(strings.Trim(strings.Split(loginCookie.String(), "=")[1], "\""), ",")
+            //isLogin := strings.Split(login_data[0], ":")[1]
+            loginId := strings.Split(login_data[1], ":")[1]
+            reader, _ := r.MultipartReader()
+            files := make([]string, 0)
+            for {
+                part, err := reader.NextPart()
+                if err == io.EOF {
+                    break
+                }   
+                if part.FileName() == "" {
+                } else {
+                    filename := "static/files/" + strconv.FormatInt(time.Now().UnixNano(), 10) + "-" + loginId + "-" + part.FileName()
+                    files = append(files, filename)
+                    dst, _ := os.Create(filename)
+                    defer dst.Close()
+                    io.Copy(dst, part)
+                }   
+            }   
+            io.WriteString(w, render.RenderFiles(files))
+            return
         }
         if dir[1] == "" {
             if config.Cfg.Users["0"].Token == "None" {
