@@ -7,5 +7,5 @@ go build -o working/blogkit -a -ldflags '-s -w -linkmode "external" -extldflags 
 
 upx working/blogkit -9 -q > /dev/null
 
-docker rmi blogkit:1.1.0
-docker build -t blogkit:1.1.0 .
+docker rmi blogkit:1.1.1
+docker build -t blogkit:1.1.1 .
