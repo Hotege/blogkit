@@ -361,12 +361,12 @@ func Run() {
                             },
                             "ModuleData": map[string]interface{}{
                                 "ModuleId": moduleId,
+                                "Modules": config.Cfg.Modules,
                             },
                             "CreateData": map[string]interface{}{
                                 "CreateId": id,
                             },
                         })
-                        //io.WriteString(w, render.RenderCreate(id, moduleId, isLogin == "true", loginId))
                         return
                     }
                 }

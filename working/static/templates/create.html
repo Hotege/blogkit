@@ -4,6 +4,9 @@
 </head>
 <body>
     {{ template "user" .LoginData }}
+    <hr>
+    {{ $module := index .ModuleData.Modules .ModuleData.ModuleId }}
+    <a href='module?id={{ .ModuleData.ModuleId }}'>...({{ $module.Name }})</a>
     {{ template "dashboard" . }}
 </body>
 </html>
