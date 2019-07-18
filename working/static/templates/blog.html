@@ -1,0 +1,16 @@
+<html>
+<head>
+    <title>BlogKit</title>
+</head>
+<body>
+    {{ template "user" .LoginData }}
+    <hr>
+    {{ $article := index .ArticleData.Articles .ArticleData.ArticleId }}
+    {{ $moduleId := $article.ModuleId }}
+    {{ $module := index .ModuleData.Modules $moduleId }}
+    <a href='module?id={{ $moduleId }}'><b>...({{ $module.Name }})</b></a><br>
+    <h1>{{ $article.Title }}</h1>
+    <span>{{ $article.DateTime }}</span><br>
+    {{ template "article" . }}
+</body>
+</html>

@@ -2,6 +2,7 @@ package app
 
 import (
     "fmt"
+    "sort"
     "net/http"
     "io"
     "io/ioutil"
@@ -10,11 +11,11 @@ import (
     "time"
     "strconv"
     "blogkit/config"
-    "blogkit/render"
     "blogkit/data"
 )
 
 func Run() {
+    initializeRenders()
     http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
     http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
         fmt.Println(r)
@@ -38,13 +39,15 @@ func Run() {
         if dir[1] == "initialize" {
             if config.Cfg.Users["0"].Token == "None" {
                 if r.Method == "GET" {
-                    io.WriteString(w, render.RenderInitialize())
+                    renders["initialize"].Execute(w, nil)
                     return
                 }
                 if r.Method == "POST" {
                     r.ParseForm()
                     if r.PostForm["init_password"][0] != r.PostForm["init_confirm"][0] {
-                        io.WriteString(w, render.RenderError("Password not confirmed."))
+                        renders["error"].Execute(w, map[string]interface{}{
+                            "Error": "Password not confirmed.",
+                        })
                         return
                     }
                     config.UpdateAdmin(r.PostForm["init_mail"][0], r.PostForm["init_name"][0], r.PostForm["init_password"][0])
@@ -86,17 +89,21 @@ func Run() {
                 return
             } else {
                 if r.Method == "GET" {
-                    io.WriteString(w, render.RenderSignUp())
+                    renders["signup"].Execute(w, nil)
                     return
                 }
                 if r.Method == "POST" {
                     r.ParseForm()
                     if r.PostForm["signup_password"][0] != r.PostForm["signup_confirm"][0] {
-                        io.WriteString(w, render.RenderError("Password not confirmed."))
+                        renders["error"].Execute(w, map[string]interface{}{
+                            "Error": "Password not confirmed.",
+                        })
                         return
                     }
                     if data.CheckUserExistByMail(r.PostForm["signup_mail"][0]) || data.CheckUserExistByName(r.PostForm["signup_name"][0]) {
-                        io.WriteString(w, render.RenderError("Mail or name already exist."))
+                        renders["error"].Execute(w, map[string]interface{}{
+                            "Error": "Mail or name already exist.",
+                        })
                         return
                     }
                     config.AddNewUser(r.PostForm["signup_mail"][0], r.PostForm["signup_name"][0], r.PostForm["signup_password"][0])
@@ -138,16 +145,45 @@ func Run() {
                             return
                         }
                         if data.CheckModuleExistById(id) {
-                            io.WriteString(w, render.RenderPage(id, isLogin == "true", loginId))
+                            var keysArticles = make([]string, 0)
+                            for k, _ := range config.Cfg.Articles {
+                                keysArticles = append(keysArticles, k)
+                            }
+                            sort.Sort(byDemical(keysArticles))
+                            var keysModules = make([]string, 0)
+                            for k, _ := range config.Cfg.Modules {
+                                keysModules = append(keysModules, k)
+                            }
+                            sort.Sort(byDemical(keysModules))
+                            renders["page"].Execute(w, map[string]interface{}{
+                                "LoginData": map[string]interface{}{
+                                    "IsLogin": isLogin == "true",
+                                    "LoginId": loginId,
+                                    "Users": config.Cfg.Users,
+                                },  
+                                "ModuleData": map[string]interface{}{
+                                    "ModuleId": id,
+                                    "Modules": config.Cfg.Modules,
+                                    "SortedKeysModules": keysModules,
+                                },
+                                "ArticleData": map[string]interface{}{
+                                    "Articles": config.Cfg.Articles,
+                                    "SortedKeysArticles": keysArticles,
+                                },
+                            })
                             return
                         } else {
-                            io.WriteString(w, render.RenderError("Page not found."))
+                            renders["error"].Execute(w, map[string]interface{}{
+                                "Error": "Page not found.",
+                            })
                             return
                         }
                     }
                     if r.Method == "POST" {
                         if isLogin != "true" {
-                            io.WriteString(w, render.RenderError("Need login."))
+                            renders["error"].Execute(w, map[string]interface{}{
+                                "Error": "Need login.",
+                            })
                             return
                         }
                         if !data.CheckUserExistById(loginId) {
@@ -157,7 +193,9 @@ func Run() {
                             }   
                             http.SetCookie(w, &newCookie)
                             loginCookie = &newCookie
-                            io.WriteString(w, render.RenderError("User error."))
+                            renders["error"].Execute(w, map[string]interface{}{
+                                "Error": "User error.",
+                            })
                             return
                         }
                         if data.CheckModuleExistById(id) {
@@ -179,7 +217,9 @@ func Run() {
                             http.Redirect(w, r, "/module?id=" + r.Form["id"][0], http.StatusFound)
                             return
                         } else {
-                            io.WriteString(w, render.RenderError("Page not found."))
+                            renders["error"].Execute(w, map[string]interface{}{
+                                "Error": "Page not found.",
+                            })
                             return
                         }
                     }
@@ -202,16 +242,44 @@ func Run() {
                     id := r.Form["id"][0]
                     if r.Method == "GET" {
                         if data.CheckArticleExistById(id) {
-                            io.WriteString(w, render.RenderArticle(id, isLogin == "true", loginId))
+                            var keysComments = make([]string, 0)
+                            for k, _ := range config.Cfg.Comments {
+                                keysComments = append(keysComments, k)
+                            }
+                            sort.Sort(byDemical(keysComments))
+                            renders["article"].Execute(w, map[string]interface{}{
+                                "LoginData": map[string]interface{}{
+                                    "IsLogin": isLogin == "true",
+                                    "LoginId": loginId,
+                                    "Users": config.Cfg.Users,
+                                },
+                                "ArticleData": map[string]interface{}{
+                                    "ArticleId": id,
+                                    "Articles": config.Cfg.Articles,
+                                    "ArticleDecode": data.DecodeArticleStruct(config.Cfg.Articles[id].Path),
+                                },
+                                "ModuleData": map[string]interface{}{
+                                    "Modules": config.Cfg.Modules,
+                                },
+                                "CommentData": map[string]interface{}{
+                                    "Comments": config.Cfg.Comments,
+                                    "SortedKeysComments": keysComments,
+                                    "RootComment": config.GetRootComment(),
+                                },
+                            })
                             return
                         } else {
-                            io.WriteString(w, render.RenderError("Page not found."))
+                            renders["error"].Execute(w, map[string]interface{}{
+                                "Error": "Page not found.",
+                            })
                             return
                         }
                     }
                     if r.Method == "POST" {
                         if isLogin != "true" {
-                            io.WriteString(w, render.RenderError("Need login."))
+                            renders["error"].Execute(w, map[string]interface{}{
+                                "Error": "Need login.",
+                            })
                             return
                         }
                         if !data.CheckUserExistById(loginId) {
@@ -221,7 +289,9 @@ func Run() {
                             }   
                             http.SetCookie(w, &newCookie)
                             loginCookie = &newCookie
-                            io.WriteString(w, render.RenderError("User error."))
+                            renders["error"].Execute(w, map[string]interface{}{
+                                "Error": "Need login.",
+                            })
                             return
                         }
                         if data.CheckArticleExistById(id) {
@@ -240,7 +310,9 @@ func Run() {
                             http.Redirect(w, r, "/article?id=" + r.Form["id"][0], http.StatusFound)
                             return
                         } else {
-                            io.WriteString(w, render.RenderError("Page not found."))
+                            renders["error"].Execute(w, map[string]interface{}{
+                                "Error": "Page not found.",
+                            })
                             return
                         }
                     }
@@ -260,11 +332,15 @@ func Run() {
                 isLogin := strings.Split(login_data[0], ":")[1]
                 loginId := strings.Split(login_data[1], ":")[1]
                 if isLogin != "true" {
-                    io.WriteString(w, render.RenderError("Need login."))
+                    renders["error"].Execute(w, map[string]interface{}{
+                        "Error": "Need login.",
+                    })
                     return
                 }
                 if !config.Cfg.Users[loginId].Permissions.CreateArticle {
-                    io.WriteString(w, render.RenderError("No permission(s)."))
+                    renders["error"].Execute(w, map[string]interface{}{
+                        "Error": "No permission(s).",
+                    })
                     return
                 }
                 id := "-1"
@@ -277,7 +353,20 @@ func Run() {
                 }
                 if r.Method == "GET" {
                     if id == "-1" {
-                        io.WriteString(w, render.RenderCreate(id, moduleId, isLogin == "true", loginId))
+                        renders["create"].Execute(w, map[string]interface{}{
+                            "LoginData": map[string]interface{}{
+                                "IsLogin": isLogin == "true",
+                                "LoginId": loginId,
+                                "Users": config.Cfg.Users,
+                            },
+                            "ModuleData": map[string]interface{}{
+                                "ModuleId": moduleId,
+                            },
+                            "CreateData": map[string]interface{}{
+                                "CreateId": id,
+                            },
+                        })
+                        //io.WriteString(w, render.RenderCreate(id, moduleId, isLogin == "true", loginId))
                         return
                     }
                 }
@@ -301,11 +390,15 @@ func Run() {
             isLogin := strings.Split(login_data[0], ":")[1]
             loginId := strings.Split(login_data[1], ":")[1]
             if isLogin != "true" {
-                io.WriteString(w, render.RenderError("Need login."))
+                renders["error"].Execute(w, map[string]interface{}{
+                    "Error": "Need login.",
+                })
                 return
             }
             if !config.Cfg.Users[loginId].Permissions.CreateArticle {
-                io.WriteString(w, render.RenderError("No permission(s)."))
+                renders["error"].Execute(w, map[string]interface{}{
+                    "Error": "No permission(s).",
+                })
                 return
             }
             reader, _ := r.MultipartReader()
@@ -325,7 +418,9 @@ func Run() {
                     io.Copy(dst, part)
                 }
             }
-            io.WriteString(w, render.RenderFiles(files))
+            renders["files"].Execute(w, map[string]interface{}{
+                "FileNames": files,
+            })
             return
         }
         if dir[1] == "upload_files" {
@@ -337,11 +432,15 @@ func Run() {
             isLogin := strings.Split(login_data[0], ":")[1]
             loginId := strings.Split(login_data[1], ":")[1]
             if isLogin != "true" {
-                io.WriteString(w, render.RenderError("Need login."))
+                renders["error"].Execute(w, map[string]interface{}{
+                    "Error": "Need login.",
+                })
                 return
             }
             if !config.Cfg.Users[loginId].Permissions.CreateArticle {
-                io.WriteString(w, render.RenderError("No permission(s)."))
+                renders["error"].Execute(w, map[string]interface{}{
+                    "Error": "No permission(s).",
+                })
                 return
             }
             reader, _ := r.MultipartReader()
@@ -359,8 +458,10 @@ func Run() {
                     defer dst.Close()
                     io.Copy(dst, part)
                 }   
-            }   
-            io.WriteString(w, render.RenderFiles(files))
+            }
+            renders["files"].Execute(w, map[string]interface{}{
+                "FileNames": files,
+            })
             return
         }
         if dir[1] == "" {
@@ -371,7 +472,32 @@ func Run() {
             login_data := strings.Split(strings.Trim(strings.Split(loginCookie.String(), "=")[1], "\""), ",")
             isLogin := strings.Split(login_data[0], ":")[1]
             loginId := strings.Split(login_data[1], ":")[1]
-            io.WriteString(w, render.RenderPage("0", isLogin == "true", loginId))
+            var keysArticles = make([]string, 0)
+            for k, _ := range config.Cfg.Articles {
+                keysArticles = append(keysArticles, k)
+            }
+            sort.Sort(byDemical(keysArticles))
+            var keysModules = make([]string, 0)
+            for k, _ := range config.Cfg.Modules {
+                keysModules = append(keysModules, k)
+            }
+            sort.Sort(byDemical(keysModules))
+            renders["page"].Execute(w, map[string]interface{}{
+                "LoginData": map[string]interface{}{
+                    "IsLogin": isLogin == "true",
+                    "LoginId": loginId,
+                    "Users": config.Cfg.Users,
+                },
+                "ModuleData": map[string]interface{}{
+                    "ModuleId": "0",
+                    "Modules": config.Cfg.Modules,
+                    "SortedKeysModules": keysModules,
+                },
+                "ArticleData": map[string]interface{}{
+                    "Articles": config.Cfg.Articles,
+                    "SortedKeysArticles": keysArticles,
+                },
+            })
             return
         }
         http.Redirect(w, r, "/", http.StatusFound)

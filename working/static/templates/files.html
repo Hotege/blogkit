@@ -1,0 +1,10 @@
+<html>
+<head>
+</head>
+<body>
+{{ range $k, $v := .FileNames }}
+    <p>{{ $k }}</p>
+    <input value='{{ $v }}' />
+{{ end }}
+</body>
+</html>

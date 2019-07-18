@@ -1,0 +1,13 @@
+<html>
+<head>
+    <title>BlogKit</title>
+</head>
+<body>
+    {{ template "user" .LoginData }}
+    <hr>
+    {{ if .LoginData.IsLogin }}
+    <a href='create?moudle={{ .ModuleData.ModuleId }}'><b>New article</b></a><br>
+    {{ end }}
+    {{ template "module" . }}
+</body>
+</html>

@@ -1,0 +1,126 @@
+{{ define "module" }}
+{{ $module := index .ModuleData.Modules .ModuleData.ModuleId }}
+{{ if ne .ModuleData.ModuleId "0" }}
+    {{ $previousId := $module.Previous }}
+    {{ $previous := index .ModuleData.Modules $previousId }}
+    <a href='module?id={{ $previousId }}'><h4>...({{ $previous.Name }})</h4></a>
+{{ end }}
+{{ if .LoginData.IsLogin }}
+    <script>
+        function showModuleEditor(id, hId, mId, pId, value, type) {
+            document.getElementById(hId).style.display = "block";
+            document.getElementById(hId).style.height = document.body.clientHeight + "px";
+            document.getElementById(id).style.display = "block";
+            document.getElementById('module_edit_id').value = mId;
+            document.getElementById('module_edit_pid').value = pId;
+            document.getElementById('module_edit_name').value = value;
+            document.getElementById('module_edit_type').value = type;
+            var options = document.getElementById('select_previous');
+            for (i = 0; i < options.length; i++) {
+                if (options[i].id == pId) {
+                    options[i].selected = true;
+                    break;
+                }
+            }
+            document.getElementById('module_edit_name').focus();
+        }
+        function hideModuleEditor(id, hId) {
+            document.getElementById(hId).style.display = "none";
+            document.getElementById(id).style.display = "none";
+        }
+        function submitModuleEditor(id, hId) {
+            hideModuleEditor(id, hId);
+            document.getElementById("module_form").submit();
+        }
+        function deleteModule(mId) {
+            var msg = confirm("Will you delete this module?");
+            if (msg) {
+                document.getElementById("delete_id").value = mId;
+                document.getElementById("delete_form").submit();
+            }
+        }
+        function deleteArticle(aId) {
+            var msg = confirm("Will you delete this module?");
+            if (msg) {
+                document.getElementById("delete_article_id").value = aId;
+                document.getElementById("delete_article_form").submit();
+            }
+        }
+    </script>
+    <div id='hidebg' style='position: absolute; left: 0px; top: 0px; background-color: #000; width: 100%; filter: alpha(opacity=60); opacity: 0.6; z-index: 2;'></div>
+    <div id='module_editor' style='position: absolute; left: 30%; top: 200px; background-color: #fff; border: 1px solid black; display: none; z-index: 3;'>
+        <form id='module_form' action='module?id={{ .ModuleData.ModuleId }}&do=edit' method='POST'>
+            <input id='module_edit_type' name='module_edit_type' readonly='readonly' style='display: none;' />
+            <input id='module_edit_id' name='module_edit_id' readonly='readonly' style='display: none;' />
+            <input id='module_edit_pid' name='module_edit_pid' readonly='readonly' style='display: none;' />
+            <span>Module name: <input id='module_edit_name' name='module_edit_name' /></span><br>
+            <span>Previous module: 
+                <select id='select_previous'>
+                {{ range $k, $v := .ModuleData.Modules }}
+                    <option id='{{ $k }}' value='{{ $v.Name }}'>{{ $v.Name }}</option>
+                {{ end }}
+                </select>
+            </span><br>
+            <div style='display: inline-block; background-color: blue; cursor: pointer;' onclick='submitModuleEditor("module_editor", "hidebg");'>submit</div>
+            <div style='display: inline-block; background-color: pink; cursor: pointer;' onclick='hideModuleEditor("module_editor", "hidebg");'>cancel</div>
+        </form>
+    </div>
+{{ end }}
+    <h3>{{ $module.Name }}</h3>
+{{ if .LoginData.IsLogin }}
+    {{ $user := index .LoginData.Users .LoginData.LoginId }}
+    <span>
+    {{ if $user.Permissions.CreateModule }}
+    <a href='javascript:showModuleEditor("module_editor", "hidebg", "-1", "{{ .ModuleData.ModuleId }}", "", "create");'>Create</a>
+    {{ end }}
+    {{ if $user.Permissions.EditModule }}
+    {{ $previousId := $module.Previous }}
+    <a href='javascript:showModuleEditor("module_editor", "hidebg", "{{ .ModuleData.ModuleId }}", "{{ $previousId }}", "{{ $module.Name }}", "edit");'>Edit</a>
+    {{ end }}
+    {{ if $user.Permissions.DeleteModule }}
+    <div style='display: none;'>
+        <form id='delete_form' action='module?id={{ .ModuleData.ModuleId }}&do=delete' method='POST'>
+            <input id='delete_id' name='delete_id' readonly='readonly' />
+        </form>
+        <form id='delete_article_form' action='module?id={{ .ModuleData.ModuleId }}&do=delete_article' method='POST'>
+            <input id='delete_article_id' name='delete_article_id' readonly='readonly' />
+        </form>
+    </div>
+    {{ end }}
+    </span><br>
+{{ end }}
+{{ range $tmp, $k := .ArticleData.SortedKeysArticles }}
+    {{ $v := index $.ArticleData.Articles $k }}
+    {{ if eq $v.ModuleId $.ModuleData.ModuleId }}
+    <a href='article?id={{ $k }}'><b>{{ $v.Title }}</b></a>
+    <span>
+    {{ if $.LoginData.IsLogin }}
+    {{ $user := index $.LoginData.Users $.LoginData.LoginId }}
+    {{ if $user.Permissions.EditArticle }}
+    <a href='create?do=edit&id={{ $k }}'>Edit</a>
+    {{ end }}
+    {{ if $user.Permissions.DeleteArticle }}
+    <a href='javascript:deleteArticle("{{ $k }}");'>Delete</a>
+    {{ end }}
+    {{ end }}
+    </span><br>
+    {{ end }}
+{{ end }}
+{{ range $tmp, $k := .ModuleData.SortedKeysModules }}
+    {{ $v := index $.ModuleData.Modules $k }}
+    {{ if eq $v.Previous $.ModuleData.ModuleId }}
+    <a href='module?id={{ $k }}'><b>{{ $v.Name }}</b></a>
+    <span>
+    {{ if $.LoginData.IsLogin }}
+    {{ $user := index $.LoginData.Users $.LoginData.LoginId }}
+    {{ if $user.Permissions.EditModule }}
+    <a href='javascript:showModuleEditor("module_editor", "hidebg", "{{ $k }}", "{{ $v.Previous }}", "{{ $v.Name }}", "edit")'>Edit</a>
+    {{ end }}
+    {{ if $user.Permissions.DeleteModule }}
+    <a href='javascript:deleteModule("{{ $k }}");'>Delete</a>
+    {{ end }}
+    {{ end }}
+    </span><br>
+    {{ end }}
+{{ end }}
+{{ end }}

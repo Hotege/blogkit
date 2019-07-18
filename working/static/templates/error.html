@@ -1,8 +1,3 @@
-package render
-
-func RenderError(error string) string {
-    result :=
-`<!DOCTYPE html>
 <html>
 <head>
     <title>BlogKit - Error</title>
@@ -19,12 +14,10 @@ func RenderError(error string) string {
     </script>
 </head>
 <body>
-    <p>` + error + `</p>
+    <p>{{ .Error }}</p>
     <span>The page will redirect after <span id='jump'>5</span> seconds</span>
     <script type='text/javascript'>
         count(5, '/');
     </script>
 </body>
-</html>`
-    return result
-}
+</html>

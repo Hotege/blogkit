@@ -1,0 +1,13 @@
+{{ define "user" }}
+{{ if .IsLogin }}
+    {{ $user := index .Users .LoginId }}
+    <span><h5>{{ $user.Name }}</h5></span>
+    <a href='logout'>logout</a>
+{{ else }}
+    <form action='login' method='POST'>
+        <span>Username: <input name='login_username' /></span><br>
+        <span>Password: <input name='login_password' type='password' /></span><br>
+        <span><input type='submit' value='login' /> <a href='signup'>sign up</a></span>
+    </form>
+{{ end }}
+{{ end }}
