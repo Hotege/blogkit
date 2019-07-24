@@ -1,14 +1,31 @@
 <html>
 <head>
     <title>BlogKit - Initialize</title>
+    <link rel='stylesheet' href='static/css/initialize.css' type='text/css' />
+    <link rel='stylesheet' href='static/css/generic.css' type='text/css' />
 </head>
-<body>
-    <form action='initialize' method='POST'>
-        <span>Mail: <input name='init_mail' /></span><br>
-        <span>Username: <input name='init_name' /></span><br>
-        <span>Password: <input name='init_password' type='password' /></span><br>
-        <span>Confirm: <input name='init_confirm' type='password' /></span><br>
-        <input type='submit' value='submit' />
-    </form>
+<body style='margin: 0;'>
+    <div class='initialize-container'>
+        <div class='initialize-table'>
+            <form class='initialize-form' action='initialize' method='POST'>
+                <div style='margin: 5% 10% 5% 10%;'>
+                    <span class='generic-font-bold welcome-title'>Welcome to Blog Kit.</span><br>
+                    <span class='generic-font welcome-content'>Please set mail address, user name and password for admin user.</span>
+                </div>
+                <hr>
+                <div style='margin: 5% 20% 5% 20%; padding: auto 20% auto 20%;'>
+                    <span class='generic-font input-explaination-font'>Mail</span>
+                    <input class='init-input' name='init_mail' />
+                    <span class='generic-font input-explaination-font'>Username</span>
+                    <input class='init-input' name='init_name' />
+                    <span class='generic-font input-explaination-font'>Password</span>
+                    <input class='init-input' name='init_password' type='password' />
+                    <span class='generic-font input-explaination-font'>Confirm</span>
+                    <input class='init-input' name='init_confirm' type='password' />
+                    <button class='init-submit'>Continue</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

@@ -1,0 +1,17 @@
+@font-face {
+    font-family: DejaVuSansMono;
+    src: url("../fonts/DejaVuSansMono.ttf")
+}
+
+.generic-font {
+    font-family: DejaVuSansMono;
+}
+
+@font-face {
+    font-family: DejaVuSansMonoBold;
+    src: url("../fonts/DejaVuSansMono-Bold.ttf")
+}
+
+.generic-font-bold {
+    font-family: DejaVuSansMonoBold;
+}
