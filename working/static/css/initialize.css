@@ -1,11 +1,3 @@
-.initialize-container {
-    background-color: lightskyblue;
-    width: 100%;
-    height: 100%;
-    display: table;
-    vertical-align: middle;
-}
-
 .initialize-table {
     width: auto;
     height: auto;
@@ -20,9 +12,6 @@
     max-width: 360px;
     height: auto;
     margin: auto;
-    background-color: lightyellow;
-    border-radius: 4px;
-    box-shadow: 0 0 8px gray;
     display: inline-block;
 }
 
@@ -53,50 +42,16 @@
 }
 
 .init-input {
-    color: dimgray;
-    background-color: lightcyan;
-    border: 1px solid royalblue;
-    outline: none;
     text-align: left;
     display: block;
     vertical-align: baseline;
     width: 100%;
+    height: 24px;
     margin-bottom: 8px;
-}
-
-.init-input:hover {
-    background-color: deepskyblue;
-    border: 1px solid royalblue;
-    outline: none;
-}
-
-.init-input:focus {
-    background-color: deepskyblue;
-    border: 1px solid royalblue;
-    outline: none;
+    text-indent: 4px;
 }
 
 .init-submit {
-    color: dimgray;
     margin-top: 8px;
-    background-color: lightcyan;
-    border-color: royalblue;
-    font-size: 16px;
     width: 100%;
-    outline: none;
-}
-
-.init-submit:hover {
-    background-color: lightskyblue;
-    border-color: royalblue;
-    cursor: pointer;
-    outline: none;
-}
-
-.init-submit:active {
-    color: lightgray;
-    background-color: royalblue;
-    border-color: royalblue;
-    cursor: pointer;
-    outline: none;
 }

@@ -15,14 +15,17 @@ function showModuleEditor(id, hId, mId, pId, value, type) {
     }
     document.getElementById('module_edit_name').focus();
 }
+
 function hideModuleEditor(id, hId) {
     document.getElementById(hId).style.display = "none";
     document.getElementById(id).style.display = "none";
 }
+
 function submitModuleEditor(id, hId) {
     hideModuleEditor(id, hId);
     document.getElementById("module_form").submit();
 }
+
 function deleteModule(mId) {
     var msg = confirm("Will you delete this module?");
     if (msg) {
@@ -30,6 +33,7 @@ function deleteModule(mId) {
         document.getElementById("delete_form").submit();
     }
 }
+
 function deleteArticle(aId) {
     var msg = confirm("Will you delete this module?");
     if (msg) {

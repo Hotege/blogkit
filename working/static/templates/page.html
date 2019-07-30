@@ -1,13 +1,20 @@
 <html>
 <head>
     <title>BlogKit</title>
+    <link rel='stylesheet' href='static/css/generic.css' type='text/css' />
+    <link rel='stylesheet' href='static/css/user.css' type='text/css' />
 </head>
-<body>
-    {{ template "user" .LoginData }}
-    <hr>
-    {{ if .LoginData.IsLogin }}
-    <a href='create?module={{ .ModuleData.ModuleId }}'><b>New article</b></a><br>
-    {{ end }}
-    {{ template "module" . }}
+<body class='body-expanded'>
+    <div class='back-generic'>
+        <div class='nav-bar'>
+            {{ template "user" .LoginData }}
+        </div>
+        <div style='margin-top: 48px;'>
+            {{ if .LoginData.IsLogin }}
+            <a href='create?module={{ .ModuleData.ModuleId }}'><b>New article</b></a><br>
+            {{ end }}
+            {{ template "module" . }}
+        <div>
+    <div>
 </body>
 </html>

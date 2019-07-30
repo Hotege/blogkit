@@ -1,13 +1,30 @@
 {{ define "user" }}
+    <link rel='stylesheet' href='static/css/generic.css' type='text/css' />
+    <link rel='stylesheet' href='static/css/user.css' type='text/css' />
 {{ if .IsLogin }}
-    {{ $user := index .Users .LoginId }}
-    <span><h5>{{ $user.Name }}</h5></span>
-    <a href='logout'>logout</a>
+    <div class='nav-login-buttons'>
+        {{ $user := index .Users .LoginId }}
+        <span class='generic-font-bold'>{{ $user.Name }}</span>
+        <div class='generic-font button-generic nav-login-button' onclick='window.location.href="logout";'>logout</div>
+    </div>
 {{ else }}
-    <form action='login' method='POST'>
-        <span>Username: <input name='login_username' /></span><br>
-        <span>Password: <input name='login_password' type='password' /></span><br>
-        <span><input type='submit' value='login' /> <a href='signup'>sign up</a></span>
+    <script src='/static/js/user.js'></script>
+    <div id='loginHideBg' class='nav-login-hide-bg'></div>
+    <form id='loginUnit' class='board-generic nav-login-form' style='display: none;' action='login' method='POST'>
+        <div class='login-message-div'>
+            <span class='generic-font login-explaination'>Username:</span>
+            <input id='login-username' class='generic-font input-generic login-input' name='login_username' />
+            <span class='generic-font login-explaination'>Password:</span>
+            <input id='login-password' class='generic-font input-generic login-input' name='login_password' type='password' />
+            <div>
+                <button class='generic-font button-generic login-button' type='submit'>Login</button>
+                <button class='generic-font button-generic login-button' type='button' onclick='hideLogin("loginUnit", "loginHideBg");'>Close</button>
+            </div>
+        </div>
     </form>
+    <div class='nav-login-buttons'>
+        <div class='generic-font button-generic nav-login-button' onclick='showLogin("loginUnit", "loginHideBg", "login-username", "login-password");'>Login</div>
+        <div class='generic-font button-generic nav-login-button' onclick='window.location.href="signup";'>SignUp</div>
+    </div>
 {{ end }}
 {{ end }}

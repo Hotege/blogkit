@@ -1,3 +1,66 @@
+.body-expanded {
+    margin: 0;
+}
+
+.back-generic {
+    background-color: lightskyblue;
+    width: 100%;
+    height: 100%;
+    display: table;
+    vertical-align: middle;
+}
+
+.board-generic {
+    background-color: lightyellow;
+    border-radius: 4px;
+    box-shadow: 0 0 8px gray;
+}
+
+.input-generic {
+    color: dimgray;
+    background-color: lightcyan;
+    border: 1px solid royalblue;
+    border-radius: 4px;
+    outline: none;
+}
+
+.input-generic:hover {
+    background-color: lightskyblue;
+}
+
+.input-generic:focus {
+    background-color: deepskyblue;
+}
+
+.button-generic {
+    color: dimgray;
+    background-color: lightcyan;
+    border: 1px solid royalblue;
+    border-color: royalblue;
+    border-radius: 4px;
+    font-size: 16px;
+    height: 24px;
+    outline: none;
+}
+
+.button-generic:hover {
+    color: darkslateblue;
+    background-color: lightblue;
+    border: 1px solid royalblue;
+    border-color: royalblue;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.button-generic:active {
+    color: lightgray;
+    background-color: royalblue;
+    border: 1px solid royalblue;
+    border-color: royalblue;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
 @font-face {
     font-family: DejaVuSansMono;
     src: url("../fonts/DejaVuSansMono.ttf")
