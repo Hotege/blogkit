@@ -43,7 +43,7 @@
     outline: none;
 }
 
-.button-generic:hover {
+.button-generic:hover, .button-generic:focus {
     color: darkslateblue;
     background-color: lightblue;
     border: 1px solid royalblue;
