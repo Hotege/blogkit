@@ -102,7 +102,7 @@
 }
 
 .board-form {
-    position: absolute;
+    position: fixed;
     width: 80%;
     max-width: 360px;
     height: 240px;
@@ -133,4 +133,66 @@
     height: 24px;
     margin-bottom: 8px;
     text-indent: 4px;
+}
+
+.addons-font {
+    font-size: 12px;
+    color: gray;
+}
+
+.append-create-button {
+    background-color: forestgreen;
+    color: silver;
+    border-color: darkgreen;
+    font-size: 16px;
+}
+
+.append-create-button:hover, .append-create-button:focus {
+    background-color: green;
+    color: white;
+    border-color: darkgreen;
+}
+
+.append-create-button:active {
+    background-color: darkgreen;
+    color: white;
+    border-color: darkgreen;
+}
+
+.append-edit-button {
+    background-color: blue;
+    color: silver;
+    border-color: navy;
+    font-size: 16px;
+}
+
+.append-edit-button:hover, .append-edit-button:focus {
+    background-color: mediumblue;
+    color: white;
+    border-color: navy;
+}
+
+.append-edit-button:active {
+    background-color: navy;
+    color: white;
+    border-color: navy;
+}
+
+.append-delete-button {
+    background-color: red;
+    color: silver;
+    border-color: maroon;
+    font-size: 16px;
+}
+
+.append-delete-button:hover, .append-delete-button:focus {
+    background-color: firebrick;
+    color: white;
+    border-color: maroon;
+}
+
+.append-delete-button:active {
+    background-color: maroon;
+    color: white;
+    border-color: maroon;
 }

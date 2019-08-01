@@ -1,96 +1,109 @@
 {{ define "article" }}
     <script src='/static/js/article-render.js'></script>
+    <link rel='stylesheet' href='static/css/generic.css' type='text/css' />
 {{ if .LoginData.IsLogin }}
     {{ $user := index .LoginData.Users .LoginData.LoginId }}
     {{ if $user.Permissions.CreateComment }}
-    <div id='hidebg' style='position: absolute; left: 0px; top: 0px; background-color: #000; width: 100%; filter: alpha(opacity=60); opacity: 0.6; z-index: 2;'></div>
-    <div id='reply_comment' style='position: absolute; left: 30%; top: 200px; background-color: #fff; border: 1px solid black; display: none; z-index: 3;'>
-        <form id='reply_form' action='article?id=` + id + `&do=reply_comment' method='POST'>
+    <div id='hidebgComments' class='board-hide-bg' style='display: none;'></div>
+    <form id='reply_form' class='generic-font board-generic board-form' style='display: none;' action='article?id={{ .ArticleData.ArticleId }}&do=reply_comment' method='POST'>
+        <div class='board-message-div' style='padding-top: 10%;'>
             <span><input id='reply_id' name='reply_id' readonly='readonly' style='display: none;' />
             <input id='reply_type' name='reply_type' readonly='readonly' style='display: none;' />
-            <div style='display: inline-block; cursor: pointer;' onclick='hideReplyComment("reply_comment", "hidebg");'>X</div></span><br>
-            <span>content:</span><br>
-            <textarea id='reply_comment_content' name='reply_comment_content' style='resize: none; width: 320px; height: 160px;'></textarea><br>
-            <div style='display: inline-block; background-color: blue; cursor: pointer;' onclick='submitReplyComment("reply_comment", "hidebg");'>submit</div>
-        </form>
-    </div>
+            <span class='board-explaination'>content:</span>
+            <textarea class='input-generic board-input' id='reply_comment_content' name='reply_comment_content' style='resize: none; width: 100%; height: 120px; text-indent: 0; padding-left: 4px; padding-right: 4px;'></textarea><br>
+            <button class='button-generic' type='submit' onclick='submitReplyComment("reply_form", "hidebgComments");'>Submit</button>
+            <button class='button-generic' type='button' onclick='hideReplyComment("reply_form", "hidebgComments");'>Cancel</button>
+        </div>
+    </form>
     {{ end }}
     {{ if $user.Permissions.DeleteComment }}
     <div style='display: none;'>
-        <form id='delete_form' action='article?id=` + id + `&do=delete_comment' method='POST'>
+        <form id='delete_form' action='article?id={{ .ArticleData.ArticleId }}&do=delete_comment' method='POST'>
             <input id='delete_id' name='delete_id' readonly='readonly' />
         </form>
     </div>
     {{ end }}
 {{ end }}
+{{ $article := index .ArticleData.Articles .ArticleData.ArticleId }}
+{{ $moduleId := $article.ModuleId }}
+{{ $module := index .ModuleData.Modules $moduleId }}
+    <div>
+        <h2 class='generic-font-bold'>{{ $article.Title }}</h2>
+        <span class='addons-font'>Last edit time: {{ $article.DateTime }}</span><br>
+        <button class='generic-font-bold button-generic' type='button' onclick='window.location.href="module?id={{ $moduleId }}"'>...({{ $module.Name }})</button>
+    </div>
 {{ if .LoginData.IsLogin }}
     {{ $user := index .LoginData.Users .LoginData.LoginId }}
     {{ if $user.Permissions.EditArticle }}
-    <a href='create?do=edit&id={{ .ArticleData.ArticleId }}'>Edit</a>
+    <button class='button-generic append-edit-button' type='button' onclick='window.location.href="create?do=edit&id={{ .ArticleData.ArticleId }}"'>Edit</button>
     {{ end }}
 {{ end }}
+    <div class='generic-font'>
 {{ range $k, $v := .ArticleData.ArticleDecode }}
     {{ if eq $v.Type "i" }}
-    <img src='{{ $v.Value }}' /><br>
+        <img src='{{ $v.Value }}' /><br>
     {{ end }}
     {{ if eq $v.Type "f" }}
-    <span>Attach file: <a href='{{ $v.Value }}'>{{ $v.Extra }}</a></span><br>
+        <span>Attach file: <a href='{{ $v.Value }}'>{{ $v.Extra }}</a></span><br>
     {{ end }}
     {{ if eq $v.Type "c" }}
-    <b>{{ index $v.Extra 0 }} code:</b><br>
+        <b>{{ index $v.Extra 0 }} code:</b><br>
         {{ range $ck, $cv := $v.Extra }}
             {{ if ne $ck 0 }}
-    <p>{{ $cv }}</p>
+        <p>{{ $cv }}</p>
             {{ end }}
         {{ end }}
     {{ end }}
     {{ if eq $v.Type "t" }}
         {{ range $tk, $tv := $v.Extra }}
-    <p>{{ $tv }}</p>
+        <p>{{ $tv }}</p>
         {{ end }}
     {{ end }}
 {{ end }}
+    </div>
 {{ if .LoginData.IsLogin }}
     {{ $user := index .LoginData.Users .LoginData.LoginId }}
     {{ if $user.Permissions.CreateComment }}
-    <span><a id='main_comment_set' href='javascript:showReplyComment("reply_comment", "hidebg", "-1", "new");'>New comment</a></span><br>
+    <button class='generic-font button-generic' type='button' id='main_comment_set' onclick='javascript:showReplyComment("reply_form", "hidebgComments", "-1", "new");'>New comment</button>
     {{ end }}
 {{ end }}
+    <div class='generic-font'>
 {{ range $tmp, $k := .CommentData.SortedKeysComments }}
     {{ $v := index $.CommentData.Comments $k }}
     {{ $be := eq $v.BelongsTo $.ArticleData.ArticleId }}
     {{ $re := eq $v.RepliesTo "-1" }}
     {{ if and $be $re }}
         {{ $author := index $.LoginData.Users $v.AuthorId }}
-    <b>{{ $author.Name }}: {{ $v.Content }} - {{ $v.DateTime }}</b>
+        <b>{{ $author.Name }}: {{ $v.Content }} - {{ $v.DateTime }}</b>
         {{ if $.LoginData.IsLogin }}
             {{ $user := index $.LoginData.Users $.LoginData.LoginId }}
             {{ if $user.Permissions.CreateComment }}
-    <span> <a id='reply_{{ $k }}' href='javascript:showReplyComment("reply_comment", "hidebg", "{{ $k }}", "reply");'>Reply</a></span>
+        <span> <button class='generic-font button-generic' type='button' id='reply_{{ $k }}' onclick='javascript:showReplyComment("reply_form", "hidebgComments", "{{ $k }}", "reply");'>Reply</button></span>
             {{ end }}
             {{ if $user.Permissions.DeleteComment }}
-    <span> <a href='javascript:deleteComment({{ $k }});'>Delete</a></span>
+        <span> <button class='generic-font button-generic append-delete-button' type='button' onclick='javascript:deleteComment({{ $k }});'>Delete</button></span>
             {{ end }}
         {{ end }}
-    <br>
+        <br>
         {{ range $ttmp, $sk := $.CommentData.SortedKeysComments }}
             {{ $sub := index $.CommentData.Comments $sk }}
             {{ $rootId := index $.CommentData.RootComment $sk }}
             {{ if eq $rootId $k }}
                 {{ $subAuthor := index $.LoginData.Users $sub.AuthorId }}
-    <span>{{ $subAuthor.Name }}: {{ $sub.Content }} - {{ $sub.DateTime }}</span>
+        <span>{{ $subAuthor.Name }}: {{ $sub.Content }} - {{ $sub.DateTime }}</span>
                 {{ if $.LoginData.IsLogin }}
                     {{ $subUser := index $.LoginData.Users $.LoginData.LoginId }}
                     {{ if $subUser.Permissions.CreateComment }}
-    <span> <a id='reply_{{ $sk }}' href='javascript:showReplyComment("reply_comment", "hidebg", "{{ $sk }}", "reply");'>Reply</a></span>
+        <span> <button class='generic-font button-generic' type='button' id='reply_{{ $sk }}' onclick='javascript:showReplyComment("reply_form", "hidebgComments", "{{ $sk }}", "reply");'>Reply</button></span>
                     {{ end }}
                     {{ if $subUser.Permissions.DeleteComment }}
-    <span> <a href='javascript:deleteComment({{ $sk }})'>Delete</a></span>
+        <span> <button class='generic-font button-generic append-delete-button' type='button' onclick='javascript:deleteComment({{ $sk }})'>Delete</button></span>
                     {{ end }}
                 {{ end }}
-    <br>
+        <br>
             {{ end }}
         {{ end }}
     {{ end }}
 {{ end }}
+    </div>
 {{ end }}

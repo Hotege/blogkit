@@ -1,0 +1,8 @@
+.blog-display {
+    background-color: lightyellow;
+    width: 100%;
+    max-width: 640px;
+    height: 100%;
+    margin: auto;
+    padding: 48px 12px 0 12px;
+}

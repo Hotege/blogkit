@@ -1,16 +1,18 @@
 <html>
 <head>
     <title>BlogKit</title>
+    <link rel='stylesheet' href='static/css/generic.css' type='text/css' />
+    <link rel='stylesheet' href='static/css/user.css' type='text/css' />
+    <link rel='stylesheet' href='static/css/blog.css' type='text/css' />
 </head>
-<body>
-    {{ template "user" .LoginData }}
-    <hr>
-    {{ $article := index .ArticleData.Articles .ArticleData.ArticleId }}
-    {{ $moduleId := $article.ModuleId }}
-    {{ $module := index .ModuleData.Modules $moduleId }}
-    <a href='module?id={{ $moduleId }}'><b>...({{ $module.Name }})</b></a><br>
-    <h1>{{ $article.Title }}</h1>
-    <span>{{ $article.DateTime }}</span><br>
-    {{ template "article" . }}
+<body class='body-expanded'>
+    <div class='back-generic'>
+        <div class='nav-bar-top'>
+            {{ template "user" .LoginData }}
+        </div>
+        <div class='blog-display'>
+            {{ template "article" . }}
+        </div>
+    </div>
 </body>
 </html>
