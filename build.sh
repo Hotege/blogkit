@@ -11,7 +11,7 @@ go build -o working/blogkit -a -ldflags '-s -w -linkmode "external" -extldflags 
 upx working/blogkit -9 -q > /dev/null
 
 # remove old docker image
-docker rmi blogkit:1.2.4
+docker rmi blogkit:1.2.5
 
 # build docker image
-docker build -t blogkit:1.2.4 .
+docker build -t blogkit:1.2.5 .
