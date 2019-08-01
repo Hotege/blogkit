@@ -3,21 +3,16 @@
     <title>BlogKit</title>
     <link rel='stylesheet' href='static/css/generic.css' type='text/css' />
     <link rel='stylesheet' href='static/css/user.css' type='text/css' />
+    <link rel='stylesheet' href='static/css/page.css' type='text/css' />
 </head>
 <body class='body-expanded'>
     <div class='back-generic'>
-        <div class='nav-bar'>
+        <div class='nav-bar-top'>
             {{ template "user" .LoginData }}
         </div>
-        <div style='margin-top: 48px; margin-left: 10%; margin-right: 10%;'>
-            {{ if .LoginData.IsLogin }}
-                {{ $user := index $.LoginData.Users $.LoginData.LoginId }}
-                {{ if $user.Permissions.CreateArticle }}
-            <a href='create?module={{ .ModuleData.ModuleId }}'><b>New article</b></a><br>
-                {{ end }}
-            {{ end }}
+        <div class='module-display'>
             {{ template "module" . }}
-        <div>
-    <div>
+        </div>
+    </div>
 </body>
 </html>

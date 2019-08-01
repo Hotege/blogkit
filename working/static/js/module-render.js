@@ -2,6 +2,7 @@ function showModuleEditor(id, hId, mId, pId, value, type) {
     document.getElementById(hId).style.display = "block";
     document.getElementById(hId).style.height = document.body.clientHeight + "px";
     document.getElementById(id).style.display = "block";
+    document.getElementById(id).style.top = (document.body.clientHeight - document.getElementById(id).clientHeight) / 2 + "px";
     document.getElementById('module_edit_id').value = mId;
     document.getElementById('module_edit_pid').value = pId;
     document.getElementById('module_edit_name').value = value;
@@ -35,7 +36,7 @@ function deleteModule(mId) {
 }
 
 function deleteArticle(aId) {
-    var msg = confirm("Will you delete this module?");
+    var msg = confirm("Will you delete this article?");
     if (msg) {
         document.getElementById("delete_article_id").value = aId;
         document.getElementById("delete_article_form").submit();

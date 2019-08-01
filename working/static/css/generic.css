@@ -10,14 +10,11 @@
     vertical-align: middle;
 }
 
-.nav-bar {
+.nav-bar-top {
     position: fixed;
     z-index: 1000;
     display: flex;
     background-color: cornflowerblue;
-    left: 0;
-    right: 0;
-    top: 0;
     left: 0;
     right: 0;
     top: 0;
@@ -91,4 +88,49 @@
 
 .generic-font-bold {
     font-family: DejaVuSansMonoBold;
+}
+
+.board-hide-bg {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    background-color: #000;
+    width: 100%;
+    filter: alpha(opacity=60);
+    opacity: 0.6;
+    z-index: 2000;
+}
+
+.board-form {
+    position: absolute;
+    width: 80%;
+    max-width: 360px;
+    height: 240px;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin-left: auto;
+    margin-right: auto;
+    z-index: 3000;
+    text-align: center;
+}
+
+.board-message-div {
+    padding-top: 20%;
+    margin-left: 20%;
+    margin-right: 20%;
+}
+
+.board-explaination {
+    text-align: left;
+    display: block;
+    vertical-align: baseline;
+}
+
+.board-input {
+    width: 100%;
+    height: 24px;
+    margin-bottom: 8px;
+    text-indent: 4px;
 }

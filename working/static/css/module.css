@@ -1,0 +1,133 @@
+.module-select {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.create-article-button {
+    display: inline-block;
+    background-color: red;
+    color: lightgray;
+    border: 1px solid maroon;
+    text-align: center;
+    cursor: pointer;
+    width: 168px;
+    height: 36px;
+    font-size: 16px;
+    border-radius: 4px;
+    outline: none;
+}
+
+.create-article-button span {
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    transition: 0.5s;
+}
+
+.create-article-button span:after {
+    content: '»';
+    position: absolute;
+    opacity: 0;
+    top: 0;
+    right: -20px;
+    transition: 0.5s;
+}
+
+.create-article-button:hover span {
+    padding-right: 25px;
+}
+
+.create-article-button:focus span {
+    padding-right: 25px;
+}
+
+.create-article-button:hover span:after {
+    opacity: 1;
+    right: 0;
+}
+
+.create-article-button:focus span:after {
+    opacity: 1;
+    right: 0;
+}
+
+.create-article-button:active {
+    background-color: darkred;
+}
+
+.append-create-button {
+    background-color: forestgreen;
+    color: silver;
+    border-color: darkgreen;
+}
+
+.append-create-button:hover, .append-create-button:focus {
+    background-color: green;
+    color: white;
+    border-color: darkgreen;
+}
+
+.append-create-button:active {
+    background-color: darkgreen;
+    color: white;
+    border-color: darkgreen;
+}
+
+.append-edit-button {
+    background-color: blue;
+    color: silver;
+    border-color: navy;
+}
+
+.append-edit-button:hover, .append-edit-button:focus {
+    background-color: mediumblue;
+    color: white;
+    border-color: navy;
+}
+
+.append-edit-button:active {
+    background-color: navy;
+    color: white;
+    border-color: navy;
+}
+
+.append-delete-button {
+    background-color: red;
+    color: silver;
+    border-color: maroon;
+}
+
+.append-delete-button:hover, .append-delete-button:focus {
+    background-color: firebrick;
+    color: white;
+    border-color: maroon;
+}
+
+.append-delete-button:active {
+    background-color: maroon;
+    color: white;
+    border-color: maroon;
+}
+
+.last-edit-time-font {
+    font-size: 12px;
+    color: gray;
+}
+
+.module-article-display {
+    display: block;
+    background-color: lightyellow;
+    border: 1px solid gold;
+    border-radius: 8px;
+    width: 99%;
+    height: 48px;
+    margin: auto;
+}
+
+.module-article-time {
+    margin-top: 6px;
+}
+
+.module-module-display {
+    display: inline-block;
+}

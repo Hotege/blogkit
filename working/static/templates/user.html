@@ -5,17 +5,17 @@
     <div class='nav-login-buttons'>
         {{ $user := index .Users .LoginId }}
         <span class='generic-font-bold'>{{ $user.Name }}</span>
-        <div class='generic-font button-generic nav-login-button' onclick='window.location.href="logout";'>logout</div>
+        <button class='generic-font button-generic nav-login-button' type='button' onclick='window.location.href="logout";'>logout</button>
     </div>
 {{ else }}
     <script src='/static/js/user.js'></script>
-    <div id='loginHideBg' class='nav-login-hide-bg'></div>
-    <form id='loginUnit' class='board-generic nav-login-form' style='display: none;' action='login' method='POST'>
-        <div class='login-message-div'>
-            <span class='generic-font login-explaination'>Username:</span>
-            <input id='login-username' class='generic-font input-generic login-input' name='login_username' />
-            <span class='generic-font login-explaination'>Password:</span>
-            <input id='login-password' class='generic-font input-generic login-input' name='login_password' type='password' />
+    <div id='loginHideBg' class='board-hide-bg' style='display: none;'></div>
+    <form id='loginUnit' class='board-generic board-form' style='display: none;' action='login' method='POST'>
+        <div class='board-message-div'>
+            <span class='generic-font board-explaination login-explaination'>Username:</span>
+            <input id='login-username' class='generic-font input-generic board-input' name='login_username' />
+            <span class='generic-font board-explaination login-explaination'>Password:</span>
+            <input id='login-password' class='generic-font input-generic board-input' name='login_password' type='password' />
             <div>
                 <button class='generic-font button-generic login-button' type='submit'>Login</button>
                 <button class='generic-font button-generic login-button' type='button' onclick='hideLogin("loginUnit", "loginHideBg");'>Close</button>
@@ -23,8 +23,8 @@
         </div>
     </form>
     <div class='nav-login-buttons'>
-        <div class='generic-font button-generic nav-login-button' onclick='showLogin("loginUnit", "loginHideBg", "login-username", "login-password");'>Login</div>
-        <div class='generic-font button-generic nav-login-button' onclick='window.location.href="signup";'>SignUp</div>
+        <button class='generic-font button-generic nav-login-button' type='button' onclick='showLogin("loginUnit", "loginHideBg", "login-username", "login-password");'>Login</button>
+        <button class='generic-font button-generic nav-login-button' type='button'  onclick='window.location.href="signup";'>SignUp</button>
     </div>
 {{ end }}
 {{ end }}

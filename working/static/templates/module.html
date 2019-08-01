@@ -1,41 +1,50 @@
 {{ define "module" }}
+    <link rel='stylesheet' href='static/css/generic.css' type='text/css' />
+    <link rel='stylesheet' href='static/css/module.css' type='text/css' />
 {{ $module := index .ModuleData.Modules .ModuleData.ModuleId }}
-{{ if ne .ModuleData.ModuleId "0" }}
-    {{ $previousId := $module.Previous }}
-    {{ $previous := index .ModuleData.Modules $previousId }}
-    <a href='module?id={{ $previousId }}'><h4>...({{ $previous.Name }})</h4></a>
-{{ end }}
 {{ if .LoginData.IsLogin }}
     <script src='/static/js/module-render.js'></script>
-    <div id='hidebg' style='position: absolute; left: 0px; top: 0px; background-color: #000; width: 100%; filter: alpha(opacity=60); opacity: 0.6; z-index: 2;'></div>
-    <div id='module_editor' style='position: absolute; left: 30%; top: 200px; background-color: #fff; border: 1px solid black; display: none; z-index: 3;'>
-        <form id='module_form' action='module?id={{ .ModuleData.ModuleId }}&do=edit' method='POST'>
+    <div id='hidebg' class='board-hide-bg' style='display: none;'></div>
+    <form id='module_form' class='board-generic board-form' style='display: none;' action='module?id={{ .ModuleData.ModuleId }}&do=edit' method='POST'>
+        <div class='board-message-div'>
             <input id='module_edit_type' name='module_edit_type' readonly='readonly' style='display: none;' />
             <input id='module_edit_id' name='module_edit_id' readonly='readonly' style='display: none;' />
             <input id='module_edit_pid' name='module_edit_pid' readonly='readonly' style='display: none;' />
-            <span>Module name: <input id='module_edit_name' name='module_edit_name' /></span><br>
-            <span>Previous module: 
-                <select id='select_previous'>
-                {{ range $k, $v := .ModuleData.Modules }}
-                    <option id='{{ $k }}' value='{{ $v.Name }}'>{{ $v.Name }}</option>
-                {{ end }}
-                </select>
-            </span><br>
-            <div style='display: inline-block; background-color: blue; cursor: pointer;' onclick='submitModuleEditor("module_editor", "hidebg");'>submit</div>
-            <div style='display: inline-block; background-color: pink; cursor: pointer;' onclick='hideModuleEditor("module_editor", "hidebg");'>cancel</div>
-        </form>
-    </div>
+            <span class='generic-font board-explaination'>Module name:</span>
+            <input id='module_edit_name' class='generic-font input-generic board-input' name='module_edit_name' />
+            <span class='generic-font board-explaination'>Previous module:</span>
+            <select id='select_previous' class='module-select'>
+    {{ range $k, $v := .ModuleData.Modules }}
+                <option id='{{ $k }}' value='{{ $v.Name }}'>{{ $v.Name }}</option>
+    {{ end }}
+            </select>
+            <div>
+                <button class='generic-font button-generic' type='submit' onclick='submitModuleEditor("module_form", "hidebg");'>submit</button>
+                <button class='generic-font button-generic' type='button' onclick='hideModuleEditor("module_form", "hidebg");'>cancel</button>
+            </div>
+        </div>
+    </form>
 {{ end }}
-    <h3>{{ $module.Name }}</h3>
+    <h3 class='generic-font-bold'>{{ $module.Name }}</h3>
+{{ if ne .ModuleData.ModuleId "0" }}
+    {{ $previousId := $module.Previous }}
+    {{ $previous := index .ModuleData.Modules $previousId }}
+    <button class='generic-font-bold button-generic' type='button' onclick='window.location.href="module?id={{ $previousId }}"'>...({{ $previous.Name }})</button>
+{{ end }}
 {{ if .LoginData.IsLogin }}
     {{ $user := index .LoginData.Users .LoginData.LoginId }}
+    {{ if $user.Permissions.CreateArticle }}
+        {{ $moduleId := .ModuleData.ModuleId }}
+    <button class='generic-font-bold create-article-button' type='button' onclick='window.location.href="create?module={{ $moduleId }}"'><span>New article</span></button><br>
+    {{ end }}
+    {{ $moduleId := .ModuleData.ModuleId }}
     <span>
     {{ if $user.Permissions.CreateModule }}
-    <a href='javascript:showModuleEditor("module_editor", "hidebg", "-1", "{{ .ModuleData.ModuleId }}", "", "create");'>Create</a>
+    <button class='generic-font button-generic append-create-button' type='button' onclick='showModuleEditor("module_form", "hidebg", "-1", "{{ $moduleId }}", "", "create");'>Create</button>
     {{ end }}
     {{ if $user.Permissions.EditModule }}
-    {{ $previousId := $module.Previous }}
-    <a href='javascript:showModuleEditor("module_editor", "hidebg", "{{ .ModuleData.ModuleId }}", "{{ $previousId }}", "{{ $module.Name }}", "edit");'>Edit</a>
+        {{ $previousId := $module.Previous }}
+    <button class='generic-font button-generic append-edit-button' type='button' onclick='showModuleEditor("module_form", "hidebg", "{{ $moduleId }}", "{{ $previousId }}", "{{ $module.Name }}", "edit");'>Edit</button>
     {{ end }}
     {{ if $user.Permissions.DeleteModule }}
     <div style='display: none;'>
@@ -49,38 +58,47 @@
     {{ end }}
     </span><br>
 {{ end }}
+    <hr>
 {{ range $tmp, $k := .ArticleData.SortedKeysArticles }}
     {{ $v := index $.ArticleData.Articles $k }}
     {{ if eq $v.ModuleId $.ModuleData.ModuleId }}
-    <a href='article?id={{ $k }}'><b>{{ $v.Title }}</b></a>
-    <span>
-    {{ if $.LoginData.IsLogin }}
-    {{ $user := index $.LoginData.Users $.LoginData.LoginId }}
-    {{ if $user.Permissions.EditArticle }}
-    <a href='create?do=edit&id={{ $k }}'>Edit</a>
-    {{ end }}
-    {{ if $user.Permissions.DeleteArticle }}
-    <a href='javascript:deleteArticle("{{ $k }}");'>Delete</a>
-    {{ end }}
-    {{ end }}
-    </span><br>
+    <div class='module-article-display'>
+        <div style='padding-left: 8px; padding-right: 8px; padding-top: 4px;'>
+            <div>
+                <a class='generic-font-bold' href='article?id={{ $k }}' style='color: black; text-decoration: none;'>{{ $v.Title }}</a>
+        {{ if $.LoginData.IsLogin }}
+            {{ $user := index $.LoginData.Users $.LoginData.LoginId }}
+            {{ if $user.Permissions.EditArticle }}
+                <button class='generic-font button-generic append-edit-button' type='button' onclick='window.location.href="create?do=edit&id={{ $k }}"'>Edit</button>
+            {{ end }}
+            {{ if $user.Permissions.DeleteArticle }}
+                <button class='generic-font button-generic append-delete-button' type='button' onclick='deleteArticle("{{ $k }}");'>Delete</button>
+            {{ end }}
+        {{ end }}
+            </div>
+            <div class='module-article-time'>
+                <span class='generic-font last-edit-time-font'>Last edit time: {{ $v.DateTime }}</span>
+            </div>
+        </div>
+    </div>
     {{ end }}
 {{ end }}
+    <hr>
 {{ range $tmp, $k := .ModuleData.SortedKeysModules }}
     {{ $v := index $.ModuleData.Modules $k }}
     {{ if eq $v.Previous $.ModuleData.ModuleId }}
-    <a href='module?id={{ $k }}'><b>{{ $v.Name }}</b></a>
-    <span>
-    {{ if $.LoginData.IsLogin }}
-    {{ $user := index $.LoginData.Users $.LoginData.LoginId }}
-    {{ if $user.Permissions.EditModule }}
-    <a href='javascript:showModuleEditor("module_editor", "hidebg", "{{ $k }}", "{{ $v.Previous }}", "{{ $v.Name }}", "edit")'>Edit</a>
-    {{ end }}
-    {{ if $user.Permissions.DeleteModule }}
-    <a href='javascript:deleteModule("{{ $k }}");'>Delete</a>
-    {{ end }}
-    {{ end }}
-    </span><br>
+    <div class='module-module-display'>
+        <button class='generic-font-bold button-generic' type='button' onclick='window.location.href="module?id={{ $k }}"'>{{ $v.Name }}</button>
+        {{ if $.LoginData.IsLogin }}
+            {{ $user := index $.LoginData.Users $.LoginData.LoginId }}
+            {{ if $user.Permissions.EditModule }}
+        <button class='generic-font button-generic append-edit-button' type='button' onclick='showModuleEditor("module_form", "hidebg", "{{ $k }}", "{{ $v.Previous }}", "{{ $v.Name }}", "edit")'>Edit</button>
+            {{ end }}
+            {{ if $user.Permissions.DeleteModule }}
+        <button class='generic-font button-generic append-delete-button' type='button' onclick='deleteModule("{{ $k }}");'>Delete</button>
+            {{ end }}
+        {{ end }}
+    </div>
     {{ end }}
 {{ end }}
 {{ end }}
